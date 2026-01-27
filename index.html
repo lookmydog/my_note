@@ -662,6 +662,7 @@
       );
     };
 
+    // --- Graph View Component (寬高皆自動適應版) ---
     const GraphView = ({ notes, onNodeClick }) => {
       const svgRef = useRef(null);
       const containerRef = useRef(null);
@@ -698,7 +699,27 @@
         const zoom = d3.zoom()
           .scaleExtent([0.1, 4])
           .on('zoom', (event) => {
+            const k = event.transform.k;
             g.attr('transform', event.transform);
+
+            // 根據縮放調整樣式
+            if (k > 1.2) {
+              // 放大模式：顯示多行
+              d3.selectAll('.node-label-div')
+                .style('-webkit-line-clamp', '4')
+                .style('white-space', 'normal')
+                .style('background', 'rgba(255,255,255,0.95)')
+                .style('box-shadow', '0 2px 4px rgba(0,0,0,0.1)')
+                .style('padding', '2px 6px');
+            } else {
+              // 全覽模式：單行
+              d3.selectAll('.node-label-div')
+                .style('-webkit-line-clamp', '1')
+                .style('white-space', 'nowrap')
+                .style('background', 'rgba(255,255,255,0.7)')
+                .style('box-shadow', 'none')
+                .style('padding', '1px 4px');
+            }
           });
 
         svg.call(zoom);
@@ -706,9 +727,9 @@
 
         const simulation = d3.forceSimulation(nodesData)
           .force('link', d3.forceLink(linksData).id(d => d.id).distance(100))
-          .force('charge', d3.forceManyBody().strength(-300))
+          .force('charge', d3.forceManyBody().strength(-350))
           .force('center', d3.forceCenter(width / 2, height / 2))
-          .force('collide', d3.forceCollide().radius(30));
+          .force('collide', d3.forceCollide().radius(40));
 
         svg.append('defs').append('marker')
           .attr('id', 'arrowhead')
@@ -767,14 +788,44 @@
           .attr('stroke-width', 2)
           .style('cursor', 'pointer');
 
-        node.append('text')
-            .attr('dy', 30)
-            .attr('text-anchor', 'middle')
-            .text(d => d.title.length > 8 ? d.title.substring(0,8)+'..' : d.title)
-            .style('font-size', '10px')
-            .style('fill', '#475569')
-            .style('pointer-events', 'none')
-            .style('text-shadow', '0 1px 2px rgba(255,255,255,0.8)');
+        // --- 修正重點 ---
+        const boxWidth = 140; // 給寬一點的空間讓長字串伸展
+        
+        node.append('foreignObject')
+          .attr('width', boxWidth)
+          .attr('height', 100) // 給一個足夠高的高度，但它是透明的
+          .attr('x', -boxWidth / 2)
+          .attr('y', 22) // 從圓點下方開始
+          .style('pointer-events', 'none')
+          .append('xhtml:div')
+          .style('width', '100%')
+          .style('height', '100%') // 讓容器填滿 foreignObject
+          .style('display', 'flex')
+          .style('justify-content', 'center')
+          .style('align-items', 'flex-start') // 關鍵！讓內容靠上對齊，不要垂直拉伸
+          .html(d => `
+            <div class="node-label-div" style="
+              width: fit-content;    /* 寬度自動縮放 */
+              height: fit-content;   /* 高度自動縮放 */
+              max-width: 100%;
+              font-size: 10px; 
+              color: #334155; 
+              text-align: center; 
+              line-height: 1.3; 
+              background: rgba(255,255,255,0.7); 
+              padding: 1px 4px; 
+              border-radius: 6px;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              display: -webkit-box;
+              -webkit-line-clamp: 1; 
+              -webkit-box-orient: vertical;  
+              white-space: nowrap;
+              transition: all 0.2s ease;
+              backdrop-filter: blur(1px);
+              border: 1px solid rgba(226, 232, 240, 0.5);
+            ">${d.title}</div>
+          `);
 
         simulation.on('tick', () => {
           link
@@ -822,7 +873,7 @@
           
           <div className="absolute bottom-4 left-0 w-full text-center pointer-events-none">
              <span className="bg-white/80 backdrop-blur px-3 py-1 rounded-full text-[10px] text-gray-500 shadow-sm border border-gray-100">
-                {notes.length === 0 ? '無資料' : '雙指縮放 • 拖曳移動'}
+                {notes.length === 0 ? '無資料' : '雙指放大查看標題 • 拖曳移動'}
              </span>
           </div>
         </div>
