@@ -223,17 +223,14 @@
             }
 
             if (window.confirm(`準備匯入 ${importedNotes.length} 張卡片。\n\n系統將採用「合併」模式：\n• 相同 ID 的卡片將被新資料覆蓋\n• 新的 ID 將直接新增\n\n確定要繼續嗎？`)) {
-              // Merge logic: Create a map of existing notes, then update/add from imported
               const existingMap = new Map(notes.map(n => [n.id, n]));
               importedNotes.forEach(n => existingMap.set(n.id, n));
               
               const newNotes = Array.from(existingMap.values());
-              // Sort by date ideally, or just keep order. 
-              
               setNotes(newNotes);
               localStorage.setItem('zettelkasten_notes', JSON.stringify(newNotes));
               alert(`匯入成功！現在共有 ${newNotes.length} 張卡片。`);
-              setView('list'); // Refresh view
+              setView('list');
             }
           } catch (err) {
             console.error(err);
@@ -241,7 +238,6 @@
           }
         };
         reader.readAsText(file);
-        // Reset input value to allow importing same file again if needed
         event.target.value = '';
       };
 
@@ -339,7 +335,8 @@
                   <Upload size={24} />
                 </button>
 
-                <button onClick={exportNotes} className="hidden md:flex p-2 text-gray-600 hover:bg-gray-100 rounded-full" title="匯出備份">
+                {/* 匯出按鈕 (已修正：手機版也會顯示) */}
+                <button onClick={exportNotes} className="p-2 text-gray-600 hover:bg-gray-100 rounded-full" title="匯出備份">
                   <Download size={24} />
                 </button>
                 
