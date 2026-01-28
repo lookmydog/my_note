@@ -11,8 +11,13 @@
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+  
   <script src="https://cdn.tailwindcss.com"></script>
+  
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
   <style>
     body {
       margin: 0;
@@ -44,6 +49,31 @@
     input, textarea, select {
       font-size: 16px !important; 
     }
+
+    /* Markdown Styles */
+    .markdown-preview {
+      color: #374151;
+      line-height: 1.7;
+      word-wrap: break-word;
+    }
+    .markdown-preview h1 { font-size: 1.75em; font-weight: 700; margin-top: 1em; margin-bottom: 0.5em; color: #111827; border-bottom: 1px solid #e5e7eb; padding-bottom: 0.3em; }
+    .markdown-preview h2 { font-size: 1.5em; font-weight: 600; margin-top: 1em; margin-bottom: 0.5em; color: #1f2937; }
+    .markdown-preview h3 { font-size: 1.25em; font-weight: 600; margin-top: 1em; margin-bottom: 0.5em; color: #374151; }
+    .markdown-preview p { margin-bottom: 1em; }
+    .markdown-preview ul { list-style-type: disc; padding-left: 1.5em; margin-bottom: 1em; }
+    .markdown-preview ol { list-style-type: decimal; padding-left: 1.5em; margin-bottom: 1em; }
+    .markdown-preview li { margin-bottom: 0.25em; }
+    .markdown-preview blockquote { border-left: 4px solid #e5e7eb; padding-left: 1em; color: #6b7280; font-style: italic; margin-bottom: 1em; }
+    .markdown-preview code { background-color: #f3f4f6; padding: 0.2em 0.4em; border-radius: 0.25em; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 0.875em; color: #ef4444; }
+    .markdown-preview pre { background-color: #1f2937; color: #f9fafb; padding: 1em; border-radius: 0.5em; overflow-x: auto; margin-bottom: 1em; }
+    .markdown-preview pre code { background-color: transparent; color: inherit; padding: 0; font-size: 0.875em; }
+    .markdown-preview a { color: #2563eb; text-decoration: underline; }
+    .markdown-preview hr { border: 0; border-top: 1px solid #e5e7eb; margin: 2em 0; }
+    .markdown-preview table { width: 100%; border-collapse: collapse; margin-bottom: 1em; }
+    .markdown-preview th, .markdown-preview td { border: 1px solid #e5e7eb; padding: 0.5em; text-align: left; }
+    .markdown-preview th { background-color: #f9fafb; font-weight: 600; }
+    .markdown-preview img { max-width: 100%; height: auto; border-radius: 0.5em; margin: 1em 0; }
+    .markdown-preview strong { font-weight: 700; color: #111827; }
   </style>
 </head>
 <body>
@@ -52,6 +82,11 @@
   <script type="text/babel">
     const { useState, useEffect, useRef } = React;
     
+    marked.setOptions({
+      breaks: true,
+      gfm: true
+    });
+
     // --- Icons ---
     const Search = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>;
     const Plus = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>;
@@ -274,14 +309,8 @@
 
       const renderMarkdown = (text) => {
         if (!text) return null;
-        return text.split('\n').map((line, i) => {
-          if (line.startsWith('# ')) return <h1 key={i} className="text-2xl font-bold mt-4 mb-2">{line.slice(2)}</h1>;
-          if (line.startsWith('## ')) return <h2 key={i} className="text-xl font-bold mt-3 mb-2">{line.slice(3)}</h2>;
-          if (line.startsWith('### ')) return <h3 key={i} className="text-lg font-bold mt-2 mb-1">{line.slice(4)}</h3>;
-          if (line.startsWith('- ')) return <li key={i} className="ml-4">{line.slice(2)}</li>;
-          if (line.trim() === '') return <br key={i} />;
-          return <p key={i} className="mb-2 break-words leading-relaxed">{line}</p>;
-        });
+        const html = marked.parse(text);
+        return <div className="markdown-preview" dangerouslySetInnerHTML={{ __html: html }} />;
       };
 
       const showList = view === 'list' && (!currentNote || window.innerWidth >= 768);
@@ -421,15 +450,6 @@
                   <div className="h-20 md:hidden"></div>
                 </div>
             </aside>
-
-            {!currentNote && view !== 'graph' && (
-                <button 
-                    onClick={createNote}
-                    className="md:hidden absolute right-6 bottom-8 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-700 active:scale-90 transition-transform z-30"
-                >
-                    <Plus size={28} />
-                </button>
-            )}
 
             <main className={mainContainerClass}>
               {view === 'graph' ? (
@@ -595,7 +615,7 @@
                                             <span>{new Date(currentNote.updatedAt).toLocaleDateString()}</span>
                                         </div>
 
-                                        <div className="prose prose-blue max-w-none text-gray-800">
+                                        <div className="text-gray-800">
                                             {renderMarkdown(formData.content)}
                                         </div>
 
