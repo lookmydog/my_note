@@ -114,6 +114,10 @@
       const [editMode, setEditMode] = useState(false);
       const fileInputRef = useRef(null);
       
+      // 滑動手勢相關 Ref (避免重渲染)
+      const touchStartX = useRef(null);
+      const touchEndX = useRef(null);
+      
       const [formData, setFormData] = useState({
         title: '',
         content: '',
@@ -237,6 +241,32 @@
         } else {
             setCurrentNote(null);
             setView('list');
+        }
+      };
+
+      // 手勢事件處理
+      const onTouchStart = (e) => {
+        touchEndX.current = null;
+        touchStartX.current = e.targetTouches[0].clientX;
+      };
+
+      const onTouchMove = (e) => {
+        touchEndX.current = e.targetTouches[0].clientX;
+      };
+
+      const onTouchEnd = () => {
+        if (!touchStartX.current || !touchEndX.current) return;
+        const distance = touchStartX.current - touchEndX.current;
+        const minSwipeDistance = 50;
+        
+        // distance < -50 代表向右滑動 (終點 < 起點 - 50 is wrong logic in normal math but:
+        // Right Swipe: Start(10) -> End(100). Distance = 10 - 100 = -90. Correct.
+        // Left Swipe: Start(100) -> End(10). Distance = 100 - 10 = 90.
+        
+        const isRightSwipe = distance < -minSwipeDistance;
+        
+        if (isRightSwipe) {
+          handleBack();
         }
       };
 
@@ -367,6 +397,12 @@
                   <Download size={24} />
                 </button>
                 
+                {/* 手機版頂部新增按鈕 (Mobile Only) */}
+                <button onClick={createNote} className="md:hidden p-2 text-blue-600 hover:bg-gray-100 rounded-full" title="新增卡片">
+                  <Plus size={24} />
+                </button>
+
+                {/* 桌機版新增按鈕 (Desktop Only) */}
                 <button onClick={createNote} className="hidden md:flex px-4 py-2 bg-blue-500 text-white rounded-lg items-center space-x-2 hover:bg-blue-600 transition-colors shadow-sm">
                   <Plus size={18} />
                   <span>新增</span>
@@ -451,6 +487,16 @@
                 </div>
             </aside>
 
+            {/* 手機版 FAB 按鈕 (右下角懸浮) - 作為備用 */}
+            {!currentNote && view !== 'graph' && (
+                <button 
+                    onClick={createNote}
+                    className="md:hidden absolute right-6 bottom-8 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-700 active:scale-90 transition-transform z-30"
+                >
+                    <Plus size={28} />
+                </button>
+            )}
+
             <main className={mainContainerClass}>
               {view === 'graph' ? (
                 <GraphView notes={notes} onNodeClick={(note) => { viewNote(note); }} />
@@ -466,7 +512,12 @@
                   )}
 
                   {(currentNote || editMode) && (
-                    <div className="h-full flex flex-col bg-white">
+                    <div 
+                      className="h-full flex flex-col bg-white"
+                      onTouchStart={onTouchStart}
+                      onTouchMove={onTouchMove}
+                      onTouchEnd={onTouchEnd}
+                    >
                         <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between flex-shrink-0 bg-white sticky top-0 z-10">
                             <div className="flex items-center space-x-2">
                                 <button onClick={handleBack} className="md:hidden p-2 -ml-2 text-gray-500">
@@ -867,49 +918,9 @@
 
         return () => simulation.stop();
       }, [notes, onNodeClick, selectedType]);
-
-      const noteTypeConfig = {
-        permanent: { label: '永久', color: 'bg-green-500' },
-        project: { label: '專案', color: 'bg-blue-500' },
-        inspiration: { label: '靈感', color: 'bg-yellow-500' },
-        literature: { label: '文獻', color: 'bg-purple-500' }
-      };
-
-      return (
-        <div className="w-full h-full relative bg-slate-50 overflow-hidden">
-          <div className="absolute top-4 left-0 right-0 z-10 px-4 overflow-x-auto no-scrollbar flex space-x-2">
-             <button
-                onClick={() => setSelectedType('all')}
-                className={'flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-bold shadow-sm transition-colors border ' + (selectedType === 'all' ? 'bg-gray-800 text-white border-transparent' : 'bg-white text-gray-700 border-gray-200')}
-              >
-                全部
-              </button>
-            {Object.entries(noteTypeConfig).map(([type, config]) => (
-                <button
-                  key={type}
-                  onClick={() => setSelectedType(type)}
-                  className={'flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-bold shadow-sm transition-colors border ' + (selectedType === type ? config.color + ' text-white border-transparent' : 'bg-white text-gray-700 border-gray-200')}
-                >
-                  {config.label}
-                </button>
-            ))}
-          </div>
-
-          <div ref={containerRef} className="w-full h-full touch-none">
-            <svg ref={svgRef} className="w-full h-full" />
-          </div>
-          
-          <div className="absolute bottom-4 left-0 w-full text-center pointer-events-none">
-             <span className="bg-white/80 backdrop-blur px-3 py-1 rounded-full text-[10px] text-gray-500 shadow-sm border border-gray-100">
-                {notes.length === 0 ? '無資料' : '雙指放大查看標題 • 拖曳移動'}
-             </span>
-          </div>
-        </div>
-      );
-    };
-
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<ZettelkastenApp />);
+}
+      const root = ReactDOM.createRoot(document.getElementById('root'));
+      root.render(<ZettelkastenApp />);
   </script>
 </body>
 </html>
