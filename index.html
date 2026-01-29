@@ -82,7 +82,6 @@
   <script type="text/babel">
     const { useState, useEffect, useRef } = React;
     
-    // 初始化 Marked
     if (typeof marked !== 'undefined') {
       marked.setOptions({
         breaks: true,
@@ -93,7 +92,6 @@
     // --- Icons ---
     const Search = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>;
     const Plus = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>;
-    const Tag = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"></path><path d="M7 7h.01"></path></svg>;
     const Link2 = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 17H7A5 5 0 0 1 7 7h2"></path><path d="M15 7h2a5 5 0 1 1 0 10h-2"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg>;
     const Network = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="2" width="6" height="6" rx="1"></rect><rect x="16" y="16" width="6" height="6" rx="1"></rect><rect x="2" y="16" width="6" height="6" rx="1"></rect><path d="M12 8v8"></path><path d="M16 19h-3a1 1 0 0 1-1-1v-2a1 1 0 0 1 1-1h3"></path><path d="M8 19H5"></path></svg>;
     const FileText = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>;
@@ -109,34 +107,10 @@
 
     // --- Templates ---
     const TEMPLATES = [
-      {
-        id: 'journal',
-        label: '每日日記',
-        icon: '📅',
-        type: 'inspiration',
-        content: `## 🎯 今日目標\n- [ ] \n- [ ] \n\n## 📝 隨手記\n\n\n## 🌙 晚間回顧\n- 今天最棒的事：\n- 需要改進的地方：`
-      },
-      {
-        id: 'meeting',
-        label: '會議記錄',
-        icon: '📝',
-        type: 'project',
-        content: `## 📅 會議資訊\n- 日期：${new Date().toLocaleDateString()}\n- 參與者：\n\n## 📝 議程\n1. \n2. \n\n## ✅ 待辦事項\n- [ ] `
-      },
-      {
-        id: 'literature',
-        label: '讀書筆記',
-        icon: '📖',
-        type: 'literature',
-        content: `## 📚 書籍資訊\n- 標題：\n- 作者：\n\n## 💡 核心概念\n\n\n## 💬 金句\n> \n\n## 🔗 延伸\n`
-      },
-      {
-        id: 'project',
-        label: '專案',
-        icon: '🚀',
-        type: 'project',
-        content: `## 🎯 目標\n\n\n## 🗓️ 階段\n- [ ] 階段一：\n- [ ] 階段二：\n\n## 🛠️ 資源\n`
-      }
+      { id: 'journal', label: '每日日記', icon: '📅', type: 'inspiration', content: `## 🎯 今日目標\n- [ ] \n- [ ] \n\n## 📝 隨手記\n\n\n## 🌙 晚間回顧\n- 今天最棒的事：\n- 需要改進的地方：` },
+      { id: 'meeting', label: '會議記錄', icon: '📝', type: 'project', content: `## 📅 會議資訊\n- 日期：${new Date().toLocaleDateString()}\n- 參與者：\n\n## 📝 議程\n1. \n2. \n\n## ✅ 待辦事項\n- [ ] ` },
+      { id: 'literature', label: '讀書筆記', icon: '📖', type: 'literature', content: `## 📚 書籍資訊\n- 標題：\n- 作者：\n\n## 💡 核心概念\n\n\n## 💬 金句\n> \n\n## 🔗 延伸\n` },
+      { id: 'project', label: '專案', icon: '🚀', type: 'project', content: `## 🎯 目標\n\n\n## 🗓️ 階段\n- [ ] 階段一：\n- [ ] 階段二：\n\n## 🛠️ 資源\n` }
     ];
 
     // --- Main App Component ---
@@ -148,6 +122,10 @@
       const [view, setView] = useState('list');
       const [editMode, setEditMode] = useState(false);
       const fileInputRef = useRef(null);
+      
+      // Link Search State
+      const [linkSearchTerm, setLinkSearchTerm] = useState('');
+      const [isLinkDropdownOpen, setIsLinkDropdownOpen] = useState(false);
       
       const touchStartX = useRef(null);
       const touchStartY = useRef(null);
@@ -190,13 +168,7 @@
       };
 
       const createNote = () => {
-        setFormData({
-          title: '',
-          content: '',
-          type: 'permanent',
-          tags: [],
-          links: []
-        });
+        setFormData({ title: '', content: '', type: 'permanent', tags: [], links: [] });
         setCurrentNote(null);
         setEditMode(true);
         setView('edit');
@@ -204,9 +176,7 @@
 
       const applyTemplate = (template) => {
         if (formData.content.trim().length > 0) {
-          if (!window.confirm('目前已有內容，套用模板將會覆蓋現有內容，確定要繼續嗎？')) {
-            return;
-          }
+          if (!window.confirm('目前已有內容，套用模板將會覆蓋現有內容，確定要繼續嗎？')) return;
         }
         setFormData({
           ...formData,
@@ -221,24 +191,20 @@
           alert('請輸入標題');
           return;
         }
-
         const noteData = {
           ...formData,
           id: currentNote?.id || generateId(),
           createdAt: currentNote?.createdAt || new Date().toISOString(),
           updatedAt: new Date().toISOString()
         };
-
         let newNotes;
         if (currentNote) {
           newNotes = notes.map(n => n.id === currentNote.id ? noteData : n);
         } else {
           newNotes = [...notes, noteData];
         }
-
         setNotes(newNotes);
         localStorage.setItem('zettelkasten_notes', JSON.stringify(newNotes));
-
         setCurrentNote(noteData);
         setEditMode(false);
       };
@@ -248,7 +214,6 @@
           const newNotes = notes.filter(n => n.id !== id);
           setNotes(newNotes);
           localStorage.setItem('zettelkasten_notes', JSON.stringify(newNotes));
-          
           if (currentNote?.id === id) {
             setCurrentNote(null);
             setView('list');
@@ -278,6 +243,8 @@
       const addLink = (noteId) => {
         if (noteId && !formData.links.includes(noteId)) {
           setFormData({ ...formData, links: [...formData.links, noteId] });
+          setLinkSearchTerm('');
+          setIsLinkDropdownOpen(false);
         }
       };
 
@@ -301,70 +268,48 @@
 
       const onTouchEnd = (e) => {
         if (!touchStartX.current || !touchStartY.current) return;
-        
         const touchEndX = e.changedTouches[0].clientX;
         const touchEndY = e.changedTouches[0].clientY;
         const timeSpent = Date.now() - touchStartTime.current;
-
         const distX = touchStartX.current - touchEndX;
         const distY = touchStartY.current - touchEndY;
-        
         if (distX < -50 && Math.abs(distX) > Math.abs(distY) && timeSpent < 300) {
           handleBack();
         }
-        
         touchStartX.current = null;
         touchStartY.current = null;
         touchStartTime.current = null;
       };
 
-      const handleImportClick = () => {
-        fileInputRef.current.click();
-      };
+      const handleImportClick = () => fileInputRef.current.click();
 
       const handleFileChange = (event) => {
         const file = event.target.files[0];
         if (!file) return;
-
         const reader = new FileReader();
         reader.onload = (e) => {
           try {
             const importedNotes = JSON.parse(e.target.result);
-            if (!Array.isArray(importedNotes)) {
-              alert('格式錯誤：匯入的檔案必須是 JSON 格式的備份檔');
-              return;
-            }
-
-            if (window.confirm(`準備匯入 ${importedNotes.length} 張卡片。\n\n系統將採用「合併」模式：\n• 相同 ID 的卡片將被新資料覆蓋\n• 新的 ID 將直接新增\n\n確定要繼續嗎？`)) {
+            if (!Array.isArray(importedNotes)) { alert('格式錯誤'); return; }
+            if (window.confirm(`準備匯入 ${importedNotes.length} 張卡片？`)) {
               const existingMap = new Map(notes.map(n => [n.id, n]));
               importedNotes.forEach(n => existingMap.set(n.id, n));
-              
               const newNotes = Array.from(existingMap.values());
               setNotes(newNotes);
               localStorage.setItem('zettelkasten_notes', JSON.stringify(newNotes));
-              alert(`匯入成功！現在共有 ${newNotes.length} 張卡片。`);
+              alert('匯入成功！');
               setView('list');
             }
-          } catch (err) {
-            console.error(err);
-            alert('匯入失敗：檔案讀取錯誤');
-          }
+          } catch (err) { alert('匯入失敗'); }
         };
         reader.readAsText(file);
         event.target.value = '';
       };
 
       const allTags = [...new Set(notes.flatMap(n => n.tags || []))];
-
       const filteredNotes = notes.filter(note => {
-        const matchSearch = searchTerm === '' || 
-          note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          note.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          note.id.includes(searchTerm);
-        
-        const matchTags = selectedTags.length === 0 || 
-          selectedTags.every(tag => note.tags?.includes(tag));
-        
+        const matchSearch = searchTerm === '' || note.title.toLowerCase().includes(searchTerm.toLowerCase()) || note.content.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchTags = selectedTags.length === 0 || selectedTags.every(tag => note.tags?.includes(tag));
         return matchSearch && matchTags;
       });
 
@@ -392,67 +337,34 @@
       };
 
       const showList = view === 'list' && (!currentNote || window.innerWidth >= 768);
-      const showEditor = view === 'edit' || (view === 'list' && currentNote);
-      const listContainerClass = `bg-white border-r border-gray-200 flex flex-col h-full 
-                                  ${(view === 'list' && !currentNote) ? 'w-full' : 'hidden md:flex md:w-80'}`;
-      
-      const mainContainerClass = `flex-1 overflow-hidden h-full flex flex-col bg-white
-                                  ${(currentNote || view === 'edit' || view === 'graph') ? 'w-full' : 'hidden md:flex'}`;
+      const listContainerClass = `bg-white border-r border-gray-200 flex flex-col h-full ${(view === 'list' && !currentNote) ? 'w-full' : 'hidden md:flex md:w-80'}`;
+      const mainContainerClass = `flex-1 overflow-hidden h-full flex flex-col bg-white ${(currentNote || view === 'edit' || view === 'graph') ? 'w-full' : 'hidden md:flex'}`;
+
+      // 連結搜尋過濾邏輯
+      const filteredLinkCandidates = notes.filter(n => 
+        n.id !== currentNote?.id && 
+        !formData.links.includes(n.id) && 
+        n.title.toLowerCase().includes(linkSearchTerm.toLowerCase())
+      );
 
       return (
         <div className="h-full flex flex-col bg-gray-50">
-          <input 
-            type="file" 
-            ref={fileInputRef} 
-            onChange={handleFileChange} 
-            accept=".json" 
-            style={{ display: 'none' }} 
-          />
-
+          <input type="file" ref={fileInputRef} onChange={handleFileChange} accept=".json" style={{ display: 'none' }} />
           <header className="bg-white border-b border-gray-200 px-4 py-3 flex-shrink-0 z-20">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 {(currentNote || view === 'graph' || view === 'edit') && (
-                    <button onClick={() => {
-                        if(view==='graph') setView('list');
-                        else handleBack();
-                    }} className="md:hidden p-2 -ml-2 text-gray-600">
-                        <ArrowLeft size={24} />
-                    </button>
+                    <button onClick={() => { if(view==='graph') setView('list'); else handleBack(); }} className="md:hidden p-2 -ml-2 text-gray-600"><ArrowLeft size={24} /></button>
                 )}
-                <h1 className="text-xl font-bold text-gray-800 truncate">
-                    {view === 'graph' ? '關係圖譜' : 'Zettelkasten'}
-                </h1>
+                <h1 className="text-xl font-bold text-gray-800 truncate">{view === 'graph' ? '關係圖譜' : 'Zettelkasten'}</h1>
               </div>
-              
               <div className="flex space-x-2">
-                {view !== 'graph' && (
-                    <button onClick={() => setView('graph')} className="p-2 text-gray-600 hover:bg-gray-100 rounded-full" title="查看圖譜">
-                        <Network size={24} />
-                    </button>
-                )}
-                {view === 'graph' && (
-                    <button onClick={() => setView('list')} className="p-2 text-gray-600 hover:bg-gray-100 rounded-full" title="返回列表">
-                        <ListIcon size={24} />
-                    </button>
-                )}
-                
-                <button onClick={handleImportClick} className="p-2 text-gray-600 hover:bg-gray-100 rounded-full" title="匯入備份">
-                  <Upload size={24} />
-                </button>
-
-                <button onClick={exportNotes} className="p-2 text-gray-600 hover:bg-gray-100 rounded-full" title="匯出備份">
-                  <Download size={24} />
-                </button>
-                
-                <button onClick={createNote} className="md:hidden p-2 text-blue-600 hover:bg-gray-100 rounded-full" title="新增卡片">
-                  <Plus size={24} />
-                </button>
-
-                <button onClick={createNote} className="hidden md:flex px-4 py-2 bg-blue-500 text-white rounded-lg items-center space-x-2 hover:bg-blue-600 transition-colors shadow-sm">
-                  <Plus size={18} />
-                  <span>新增</span>
-                </button>
+                {view !== 'graph' && <button onClick={() => setView('graph')} className="p-2 text-gray-600 hover:bg-gray-100 rounded-full"><Network size={24} /></button>}
+                {view === 'graph' && <button onClick={() => setView('list')} className="p-2 text-gray-600 hover:bg-gray-100 rounded-full"><ListIcon size={24} /></button>}
+                <button onClick={handleImportClick} className="p-2 text-gray-600 hover:bg-gray-100 rounded-full"><Upload size={24} /></button>
+                <button onClick={exportNotes} className="p-2 text-gray-600 hover:bg-gray-100 rounded-full"><Download size={24} /></button>
+                <button onClick={createNote} className="md:hidden p-2 text-blue-600 hover:bg-gray-100 rounded-full"><Plus size={24} /></button>
+                <button onClick={createNote} className="hidden md:flex px-4 py-2 bg-blue-500 text-white rounded-lg items-center space-x-2 hover:bg-blue-600 transition-colors shadow-sm"><Plus size={18} /><span>新增</span></button>
               </div>
             </div>
           </header>
@@ -462,320 +374,114 @@
                 <div className="p-3 border-b border-gray-200 bg-gray-50">
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-                    <input
-                      type="text"
-                      placeholder="搜尋..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
-                    />
+                    <input type="text" placeholder="搜尋..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm" />
                   </div>
                 </div>
-
                 <div className="px-3 py-2 border-b border-gray-200 flex-shrink-0">
                   <div className="flex overflow-x-auto no-scrollbar gap-2 pb-1">
                     {allTags.map(tag => (
-                      <button
-                        key={tag}
-                        onClick={() => {
-                          if (selectedTags.includes(tag)) {
-                            setSelectedTags(selectedTags.filter(t => t !== tag));
-                          } else {
-                            setSelectedTags([...selectedTags, tag]);
-                          }
-                        }}
-                        className={'flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ' + (selectedTags.includes(tag) ? 'bg-blue-500 text-white shadow-sm' : 'bg-gray-100 text-gray-600 border border-gray-200')}
-                      >
-                        #{tag}
-                      </button>
+                      <button key={tag} onClick={() => setSelectedTags(selectedTags.includes(tag) ? selectedTags.filter(t=>t!==tag) : [...selectedTags, tag])} className={'flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ' + (selectedTags.includes(tag) ? 'bg-blue-500 text-white shadow-sm' : 'bg-gray-100 text-gray-600 border border-gray-200')}>#{tag}</button>
                     ))}
                   </div>
                 </div>
-
                 <div className="flex-1 overflow-y-auto p-2 space-y-2 bg-gray-50">
-                  {filteredNotes.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-64 text-gray-400">
-                      <FileText size={48} className="mb-4 opacity-30" />
-                      <p>無符合條件的卡片</p>
-                    </div>
-                  ) : (
-                    filteredNotes.map(note => {
+                  {filteredNotes.map(note => {
                       const TypeIcon = noteTypeConfig[note.type] ? noteTypeConfig[note.type].icon : FileText;
                       return (
-                        <div
-                          key={note.id}
-                          onClick={() => viewNote(note)}
-                          className={'p-4 bg-white border border-gray-100 rounded-xl shadow-sm active:scale-[0.98] transition-transform cursor-pointer ' + (currentNote?.id === note.id ? 'ring-2 ring-blue-500 border-transparent' : '')}
-                        >
+                        <div key={note.id} onClick={() => viewNote(note)} className={'p-4 bg-white border border-gray-100 rounded-xl shadow-sm active:scale-[0.98] transition-transform cursor-pointer ' + (currentNote?.id === note.id ? 'ring-2 ring-blue-500 border-transparent' : '')}>
                           <div className="flex items-start justify-between mb-2">
-                            <div className="flex items-center space-x-2">
-                              <span className={'p-1.5 rounded-md ' + (noteTypeConfig[note.type]?.color.split(' ')[0] || 'bg-gray-100')}>
-                                <TypeIcon size={14} className={noteTypeConfig[note.type]?.color.split(' ')[1] || 'text-gray-500'} />
-                              </span>
-                            </div>
+                            <div className="flex items-center space-x-2"><span className={'p-1.5 rounded-md ' + (noteTypeConfig[note.type]?.color.split(' ')[0] || 'bg-gray-100')}><TypeIcon size={14} className={noteTypeConfig[note.type]?.color.split(' ')[1] || 'text-gray-500'} /></span></div>
                             <span className="text-xs text-gray-400">{new Date(note.updatedAt).toLocaleDateString()}</span>
                           </div>
                           <h3 className="font-bold text-gray-800 mb-1 text-base leading-tight">{note.title || '無標題'}</h3>
                           <p className="text-sm text-gray-500 line-clamp-2 leading-relaxed">{note.content}</p>
-                          {note.tags && note.tags.length > 0 && (
-                            <div className="flex flex-wrap gap-1 mt-3">
-                              {note.tags.slice(0, 3).map(tag => (
-                                <span key={tag} className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded text-xs">#{tag}</span>
-                              ))}
-                              {note.tags.length > 3 && <span className="text-xs text-gray-400 py-0.5">+</span>}
-                            </div>
-                          )}
+                          {note.tags && note.tags.length > 0 && <div className="flex flex-wrap gap-1 mt-3">{note.tags.slice(0, 3).map(tag => <span key={tag} className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded text-xs">#{tag}</span>)}</div>}
                         </div>
                       );
-                    })
-                  )}
+                  })}
                   <div className="h-20 md:hidden"></div>
                 </div>
             </aside>
 
-            {/* 手機版 FAB 按鈕 (備用) */}
-            {!currentNote && view !== 'graph' && (
-                <button 
-                    onClick={createNote}
-                    className="md:hidden absolute right-6 bottom-8 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-700 active:scale-90 transition-transform z-30"
-                >
-                    <Plus size={28} />
-                </button>
-            )}
+            {!currentNote && view !== 'graph' && <button onClick={createNote} className="md:hidden absolute right-6 bottom-8 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-700 active:scale-90 transition-transform z-30"><Plus size={28} /></button>}
 
             <main className={mainContainerClass}>
-              {view === 'graph' ? (
-                <GraphView notes={notes} onNodeClick={(note) => { viewNote(note); }} />
-              ) : (
+              {view === 'graph' ? <GraphView notes={notes} onNodeClick={(note) => { viewNote(note); }} /> : (
                 <>
-                  {!currentNote && !editMode && (
-                    <div className="hidden md:flex flex-col items-center justify-center h-full text-gray-400 bg-gray-50">
-                        <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                            <FileText size={48} className="opacity-30" />
-                        </div>
-                        <p className="text-lg font-medium">選擇或建立一張卡片</p>
-                    </div>
-                  )}
-
+                  {!currentNote && !editMode && <div className="hidden md:flex flex-col items-center justify-center h-full text-gray-400 bg-gray-50"><div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4"><FileText size={48} className="opacity-30" /></div><p className="text-lg font-medium">選擇或建立一張卡片</p></div>}
                   {(currentNote || editMode) && (
-                    <div 
-                      className="h-full flex flex-col bg-white"
-                      onTouchStart={onTouchStart}
-                      onTouchEnd={onTouchEnd}
-                    >
+                    <div className="h-full flex flex-col bg-white" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
                         <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between flex-shrink-0 bg-white sticky top-0 z-10">
                             <div className="flex items-center space-x-2">
-                                <button onClick={handleBack} className="md:hidden p-2 -ml-2 text-gray-500">
-                                    <ArrowLeft size={20} />
-                                </button>
-                                {editMode ? (
-                                    <span className="text-lg font-bold">{currentNote ? '編輯' : '新增'}</span>
-                                ) : (
-                                    <span className={'px-3 py-1 rounded-full text-xs font-medium ' + (noteTypeConfig[formData.type]?.color || 'bg-gray-100')}>
-                                        {noteTypeConfig[formData.type]?.label || '未分類'}
-                                    </span>
-                                )}
+                                <button onClick={handleBack} className="md:hidden p-2 -ml-2 text-gray-500"><ArrowLeft size={20} /></button>
+                                {editMode ? <span className="text-lg font-bold">{currentNote ? '編輯' : '新增'}</span> : <span className={'px-3 py-1 rounded-full text-xs font-medium ' + (noteTypeConfig[formData.type]?.color || 'bg-gray-100')}>{noteTypeConfig[formData.type]?.label || '未分類'}</span>}
                             </div>
                             <div className="flex items-center space-x-2">
-                                {editMode ? (
-                                    <>
-                                        {currentNote && (
-                                            <button onClick={() => deleteNote(currentNote.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-full">
-                                                <Trash2 size={20} />
-                                            </button>
-                                        )}
-                                        <button onClick={saveNote} className="px-4 py-2 bg-blue-600 text-white text-sm font-bold rounded-full shadow-sm active:scale-95 transition-transform">
-                                            儲存
-                                        </button>
-                                    </>
-                                ) : (
-                                    <button onClick={() => setEditMode(true)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-full">
-                                        <Edit2 size={20} />
-                                    </button>
-                                )}
+                                {editMode ? <><button onClick={() => deleteNote(currentNote.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-full"><Trash2 size={20} /></button><button onClick={saveNote} className="px-4 py-2 bg-blue-600 text-white text-sm font-bold rounded-full shadow-sm active:scale-95 transition-transform">儲存</button></> : <button onClick={() => setEditMode(true)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-full"><Edit2 size={20} /></button>}
                             </div>
                         </div>
 
                         <div className="flex-1 overflow-y-auto p-5 md:p-8">
                             <div className="max-w-3xl mx-auto space-y-6 pb-20">
-                                
                                 {editMode ? (
                                     <>
-                                        {/* Template Buttons */}
                                         <div className="mb-4">
                                             <div className="text-xs font-bold text-gray-400 uppercase mb-2">快速模板</div>
                                             <div className="flex overflow-x-auto no-scrollbar gap-2 pb-2">
                                               {TEMPLATES.map(template => (
-                                                <button
-                                                  key={template.id}
-                                                  onClick={() => applyTemplate(template)}
-                                                  className="flex-shrink-0 flex items-center space-x-2 px-3 py-2 bg-gray-50 hover:bg-blue-50 border border-gray-200 hover:border-blue-200 rounded-lg transition-colors group"
-                                                >
-                                                  <span className="text-lg">{template.icon}</span>
-                                                  <span className="text-sm text-gray-700 group-hover:text-blue-700">{template.label}</span>
-                                                </button>
+                                                <button key={template.id} onClick={() => applyTemplate(template)} className="flex-shrink-0 flex items-center space-x-2 px-3 py-2 bg-gray-50 hover:bg-blue-50 border border-gray-200 hover:border-blue-200 rounded-lg transition-colors group"><span className="text-lg">{template.icon}</span><span className="text-sm text-gray-700 group-hover:text-blue-700">{template.label}</span></button>
                                               ))}
                                             </div>
                                         </div>
-
-                                        <div>
-                                            <input
-                                                type="text"
-                                                value={formData.title}
-                                                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                                className="w-full text-2xl font-bold placeholder-gray-300 border-none focus:ring-0 p-0"
-                                                placeholder="輸入標題..."
-                                            />
-                                        </div>
-
+                                        <div><input type="text" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className="w-full text-2xl font-bold placeholder-gray-300 border-none focus:ring-0 p-0" placeholder="輸入標題..." /></div>
                                         <div className="flex overflow-x-auto no-scrollbar gap-2 py-1">
                                             {Object.entries(noteTypeConfig).map(([type, config]) => {
                                                 const isActive = formData.type === type;
-                                                return (
-                                                    <button
-                                                        key={type}
-                                                        onClick={() => setFormData({ ...formData, type })}
-                                                        className={`flex-shrink-0 flex items-center space-x-1.5 px-3 py-2 rounded-lg text-sm transition-all border ${isActive ? 'bg-blue-50 border-blue-200 text-blue-700 ring-1 ring-blue-500' : 'bg-white border-gray-200 text-gray-600'}`}
-                                                    >
-                                                        <config.icon size={16} />
-                                                        <span>{config.label}</span>
-                                                    </button>
-                                                )
+                                                return <button key={type} onClick={() => setFormData({ ...formData, type })} className={`flex-shrink-0 flex items-center space-x-1.5 px-3 py-2 rounded-lg text-sm transition-all border ${isActive ? 'bg-blue-50 border-blue-200 text-blue-700 ring-1 ring-blue-500' : 'bg-white border-gray-200 text-gray-600'}`}><config.icon size={16} /><span>{config.label}</span></button>
                                             })}
                                         </div>
-
-                                        <textarea
-                                            value={formData.content}
-                                            onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                                            className="w-full h-[50vh] resize-none border-none focus:ring-0 p-0 text-gray-700 leading-relaxed font-mono text-base"
-                                            placeholder="開始輸入內容 (支援 Markdown)..."
-                                        />
-
+                                        <textarea value={formData.content} onChange={(e) => setFormData({ ...formData, content: e.target.value })} className="w-full h-[50vh] resize-none border-none focus:ring-0 p-0 text-gray-700 leading-relaxed font-mono text-base" placeholder="開始輸入內容 (支援 Markdown)..." />
                                         <div className="space-y-2 pt-4 border-t border-gray-100">
                                             <label className="text-xs font-bold text-gray-500 uppercase">Tags</label>
-                                            <div className="flex flex-wrap gap-2 mb-2">
-                                                {formData.tags.map(tag => (
-                                                    <span key={tag} className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm flex items-center">
-                                                        #{tag}
-                                                        <button onClick={() => setFormData({ ...formData, tags: formData.tags.filter(t => t !== tag) })} className="ml-1 p-0.5 rounded-full hover:bg-blue-100">
-                                                            <X size={12} />
-                                                        </button>
-                                                    </span>
-                                                ))}
-                                            </div>
-                                            <div className="flex gap-2">
-                                                <input
-                                                    type="text"
-                                                    id="tagInput"
-                                                    className="flex-1 px-4 py-2 bg-gray-50 border-transparent rounded-lg focus:bg-white focus:ring-2 focus:ring-blue-500 transition-colors"
-                                                    placeholder="新增標籤..."
-                                                    onKeyPress={(e) => {
-                                                        if (e.key === 'Enter') {
-                                                            addTag(e.target.value.trim());
-                                                            e.target.value = '';
-                                                        }
-                                                    }}
-                                                />
-                                                <button onClick={() => {
-                                                    const input = document.getElementById('tagInput');
-                                                    addTag(input.value.trim());
-                                                    input.value = '';
-                                                }} className="px-4 py-2 bg-gray-100 rounded-lg font-medium text-gray-600">加入</button>
-                                            </div>
+                                            <div className="flex flex-wrap gap-2 mb-2">{formData.tags.map(tag => <span key={tag} className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm flex items-center">#{tag}<button onClick={() => setFormData({ ...formData, tags: formData.tags.filter(t => t !== tag) })} className="ml-1 p-0.5 rounded-full hover:bg-blue-100"><X size={12} /></button></span>)}</div>
+                                            <div className="flex gap-2"><input type="text" id="tagInput" className="flex-1 px-4 py-2 bg-gray-50 border-transparent rounded-lg focus:bg-white focus:ring-2 focus:ring-blue-500 transition-colors" placeholder="新增標籤..." onKeyPress={(e) => { if (e.key === 'Enter') { addTag(e.target.value.trim()); e.target.value = ''; } }} /><button onClick={() => { const input = document.getElementById('tagInput'); addTag(input.value.trim()); input.value = ''; }} className="px-4 py-2 bg-gray-100 rounded-lg font-medium text-gray-600">加入</button></div>
                                         </div>
-
-                                        <div className="space-y-2 pt-4">
-                                            <label className="text-xs font-bold text-gray-500 uppercase">Links</label>
-                                            <div className="space-y-2">
+                                        
+                                        <div className="space-y-2 pt-4 relative">
+                                            <label className="text-xs font-bold text-gray-500 uppercase">Links (搜尋筆記加入連結)</label>
+                                            <div className="space-y-2 mb-2">
                                                 {formData.links.map(linkId => {
                                                      const linked = notes.find(n => n.id === linkId);
                                                      if(!linked) return null;
                                                      return (
                                                         <div key={linkId} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                                            <div className="flex items-center space-x-2 overflow-hidden">
-                                                                <Link2 size={16} className="text-gray-400 flex-shrink-0"/>
-                                                                <span className="truncate text-sm font-medium">{linked.title}</span>
-                                                            </div>
-                                                            <button onClick={() => setFormData({ ...formData, links: formData.links.filter(l => l !== linkId) })} className="text-gray-400 hover:text-red-500 p-1">
-                                                                <X size={16} />
-                                                            </button>
+                                                            <div className="flex items-center space-x-2 overflow-hidden"><Link2 size={16} className="text-gray-400 flex-shrink-0"/><span className="truncate text-sm font-medium">{linked.title}</span></div>
+                                                            <button onClick={() => setFormData({ ...formData, links: formData.links.filter(l => l !== linkId) })} className="text-gray-400 hover:text-red-500 p-1"><X size={16} /></button>
                                                         </div>
                                                      )
                                                 })}
                                             </div>
-                                            <div className="flex gap-2">
-                                                <select
-                                                  id="linkSelect"
-                                                  className="flex-1 px-4 py-2 bg-gray-50 border-transparent rounded-lg focus:bg-white focus:ring-2 focus:ring-blue-500"
-                                                >
-                                                  <option value="">選擇連結卡片...</option>
-                                                  {notes.filter(n => n.id !== currentNote?.id).map(note => (
-                                                    <option key={note.id} value={note.id}>{note.title}</option>
+                                            <div className="relative">
+                                              <input type="text" placeholder="輸入標題搜尋筆記..." value={linkSearchTerm} onChange={(e) => { setLinkSearchTerm(e.target.value); setIsLinkDropdownOpen(true); }} onFocus={() => setIsLinkDropdownOpen(true)} onBlur={() => setTimeout(() => setIsLinkDropdownOpen(false), 200)} className="w-full px-4 py-2 bg-gray-50 border-transparent rounded-lg focus:bg-white focus:ring-2 focus:ring-blue-500 transition-colors" />
+                                              {isLinkDropdownOpen && linkSearchTerm && (
+                                                <div className="absolute top-full left-0 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-20 max-h-48 overflow-y-auto">
+                                                  {filteredLinkCandidates.length === 0 ? <div className="p-3 text-sm text-gray-400 text-center">找不到相關筆記</div> : filteredLinkCandidates.map(note => (
+                                                      <div key={note.id} onClick={() => addLink(note.id)} className="px-4 py-2 hover:bg-blue-50 cursor-pointer text-sm text-gray-700 flex items-center"><span className="truncate">{note.title}</span></div>
                                                   ))}
-                                                </select>
-                                                <button onClick={() => {
-                                                    const select = document.getElementById('linkSelect');
-                                                    if(select.value) { addLink(select.value); select.value=''; }
-                                                }} className="px-4 py-2 bg-gray-100 rounded-lg font-medium text-gray-600">加入</button>
+                                                </div>
+                                              )}
                                             </div>
                                         </div>
                                     </>
                                 ) : (
                                     <>
                                         <h1 className="text-3xl font-bold text-gray-900 leading-tight">{formData.title}</h1>
-                                        
-                                        <div className="flex items-center space-x-4 text-sm text-gray-500 font-mono border-b border-gray-100 pb-4">
-                                            <span>{new Date(currentNote.updatedAt).toLocaleDateString()}</span>
-                                        </div>
-
-                                        <div className="text-gray-800">
-                                            {renderMarkdown(formData.content)}
-                                        </div>
-
-                                        {formData.tags.length > 0 && (
-                                            <div className="flex flex-wrap gap-2 pt-6">
-                                                {formData.tags.map(tag => (
-                                                    <span key={tag} className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm">#{tag}</span>
-                                                ))}
-                                            </div>
-                                        )}
-
+                                        <div className="flex items-center space-x-4 text-sm text-gray-500 font-mono border-b border-gray-100 pb-4"><span>{new Date(currentNote.updatedAt).toLocaleDateString()}</span></div>
+                                        <div className="text-gray-800">{renderMarkdown(formData.content)}</div>
+                                        {formData.tags.length > 0 && <div className="flex flex-wrap gap-2 pt-6">{formData.tags.map(tag => <span key={tag} className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm">#{tag}</span>)}</div>}
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-8 mt-8 border-t border-gray-100">
-                                            {formData.links.length > 0 && (
-                                                <div>
-                                                    <h3 className="text-sm font-bold text-gray-500 uppercase mb-3 flex items-center">
-                                                        <Link2 size={14} className="mr-1"/> 連結至
-                                                    </h3>
-                                                    <div className="space-y-2">
-                                                        {formData.links.map(linkId => {
-                                                            const n = notes.find(x => x.id === linkId);
-                                                            return n ? (
-                                                                <div key={linkId} onClick={() => viewNote(n)} className="p-3 bg-gray-50 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 cursor-pointer transition-colors">
-                                                                    {n.title}
-                                                                </div>
-                                                            ) : null;
-                                                        })}
-                                                    </div>
-                                                </div>
-                                            )}
-                                            
-                                            {(() => {
-                                                const backlinks = notes.filter(n => n.links?.includes(currentNote.id));
-                                                return backlinks.length > 0 ? (
-                                                    <div>
-                                                        <h3 className="text-sm font-bold text-gray-500 uppercase mb-3 flex items-center">
-                                                            <Network size={14} className="mr-1"/> 被引用於
-                                                        </h3>
-                                                        <div className="space-y-2">
-                                                            {backlinks.map(n => (
-                                                                <div key={n.id} onClick={() => viewNote(n)} className="p-3 bg-blue-50 text-blue-800 rounded-lg text-sm font-medium hover:bg-blue-100 cursor-pointer transition-colors">
-                                                                    {n.title}
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    </div>
-                                                ) : null;
-                                            })()}
+                                            {formData.links.length > 0 && <div><h3 className="text-sm font-bold text-gray-500 uppercase mb-3 flex items-center"><Link2 size={14} className="mr-1"/> 連結至</h3><div className="space-y-2">{formData.links.map(linkId => { const n = notes.find(x => x.id === linkId); return n ? <div key={linkId} onClick={() => viewNote(n)} className="p-3 bg-gray-50 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 cursor-pointer transition-colors">{n.title}</div> : null; })}</div></div>}
+                                            {(() => { const backlinks = notes.filter(n => n.links?.includes(currentNote.id)); return backlinks.length > 0 ? <div><h3 className="text-sm font-bold text-gray-500 uppercase mb-3 flex items-center"><Network size={14} className="mr-1"/> 被引用於</h3><div className="space-y-2">{backlinks.map(n => <div key={n.id} onClick={() => viewNote(n)} className="p-3 bg-blue-50 text-blue-800 rounded-lg text-sm font-medium hover:bg-blue-100 cursor-pointer transition-colors">{n.title}</div>)}</div></div> : null; })()}
                                         </div>
                                     </>
                                 )}
@@ -791,7 +497,7 @@
       );
     };
 
-    // --- Graph View Component ---
+    // --- Graph View Component (SVG) ---
     const GraphView = ({ notes, onNodeClick }) => {
       const svgRef = useRef(null);
       const containerRef = useRef(null);
@@ -844,14 +550,8 @@
                 const group = d3.select(this);
                 const fullText = d.title.length > 20 ? d.title.substring(0, 20) + '...' : d.title;
                 const w = getTextWidth(fullText);
-                
                 group.select('text').text(fullText);
-                group.select('rect')
-                  .attr('width', w)
-                  .attr('x', -w / 2)
-                  .style('opacity', 0.95)
-                  .style('stroke', '#cbd5e1');
-                
+                group.select('rect').attr('width', w).attr('x', -w / 2).style('opacity', 0.95).style('stroke', '#cbd5e1');
                 group.raise();
               });
             } else {
@@ -859,13 +559,8 @@
                 const group = d3.select(this);
                 const shortText = d.title.length > 6 ? d.title.substring(0, 6) + '..' : d.title;
                 const w = getTextWidth(shortText);
-
                 group.select('text').text(shortText);
-                group.select('rect')
-                  .attr('width', w)
-                  .attr('x', -w / 2)
-                  .style('opacity', 0.7)
-                  .style('stroke', 'none');
+                group.select('rect').attr('width', w).attr('x', -w / 2).style('opacity', 0.7).style('stroke', 'none');
               });
             }
           });
@@ -887,9 +582,7 @@
           .attr('markerWidth', 6)
           .attr('markerHeight', 6)
           .attr('orient', 'auto')
-          .append('path')
-          .attr('d', 'M0,-5L10,0L0,5')
-          .attr('fill', '#cbd5e1');
+          .append('path').attr('d', 'M0,-5L10,0L0,5').attr('fill', '#cbd5e1');
 
         const link = g.append('g')
           .attr('stroke', '#cbd5e1')
@@ -969,12 +662,7 @@
           });
 
         simulation.on('tick', () => {
-          link
-            .attr('x1', d => d.source.x)
-            .attr('y1', d => d.source.y)
-            .attr('x2', d => d.target.x)
-            .attr('y2', d => d.target.y);
-
+          link.attr('x1', d => d.source.x).attr('y1', d => d.source.y).attr('x2', d => d.target.x).attr('y2', d => d.target.y);
           node.attr('transform', d => `translate(${d.x},${d.y})`);
         });
 
@@ -991,32 +679,13 @@
       return (
         <div className="w-full h-full relative bg-slate-50 overflow-hidden">
           <div className="absolute top-4 left-0 right-0 z-10 px-4 overflow-x-auto no-scrollbar flex space-x-2">
-             <button
-                onClick={() => setSelectedType('all')}
-                className={'flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-bold shadow-sm transition-colors border ' + (selectedType === 'all' ? 'bg-gray-800 text-white border-transparent' : 'bg-white text-gray-700 border-gray-200')}
-              >
-                全部
-              </button>
+             <button onClick={() => setSelectedType('all')} className={'flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-bold shadow-sm transition-colors border ' + (selectedType === 'all' ? 'bg-gray-800 text-white border-transparent' : 'bg-white text-gray-700 border-gray-200')}>全部</button>
             {Object.entries(noteTypeConfig).map(([type, config]) => (
-                <button
-                  key={type}
-                  onClick={() => setSelectedType(type)}
-                  className={'flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-bold shadow-sm transition-colors border ' + (selectedType === type ? config.color + ' text-white border-transparent' : 'bg-white text-gray-700 border-gray-200')}
-                >
-                  {config.label}
-                </button>
+                <button key={type} onClick={() => setSelectedType(type)} className={'flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-bold shadow-sm transition-colors border ' + (selectedType === type ? config.color + ' text-white border-transparent' : 'bg-white text-gray-700 border-gray-200')}>{config.label}</button>
             ))}
           </div>
-
-          <div ref={containerRef} className="w-full h-full touch-none">
-            <svg ref={svgRef} className="w-full h-full" />
-          </div>
-          
-          <div className="absolute bottom-4 left-0 w-full text-center pointer-events-none">
-             <span className="bg-white/80 backdrop-blur px-3 py-1 rounded-full text-[10px] text-gray-500 shadow-sm border border-gray-100">
-                {notes.length === 0 ? '無資料' : '雙指放大查看標題 • 拖曳移動'}
-             </span>
-          </div>
+          <div ref={containerRef} className="w-full h-full touch-none"><svg ref={svgRef} className="w-full h-full" /></div>
+          <div className="absolute bottom-4 left-0 w-full text-center pointer-events-none"><span className="bg-white/80 backdrop-blur px-3 py-1 rounded-full text-[10px] text-gray-500 shadow-sm border border-gray-100">{notes.length === 0 ? '無資料' : '雙指放大查看標題 • 拖曳移動'}</span></div>
         </div>
       );
     };
