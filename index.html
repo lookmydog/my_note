@@ -79,7 +79,9 @@
 <body>
   <div id="root"></div>
   
-  <script type="text/babel">
+   <script
+    type="text/babel"
+    data-presets="react">
     const { useState, useEffect, useRef } = React;
     
     if (typeof marked !== 'undefined') {
@@ -690,8 +692,15 @@
       );
     };
 
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<ZettelkastenApp />);
+    try {
+      const root = ReactDOM.createRoot(
+        document.getElementById('root')
+      );
+    
+      root.render(<ZettelkastenApp />);
+    } catch (e) {
+      console.error(e);
+    }
   </script>
 </body>
 </html>
