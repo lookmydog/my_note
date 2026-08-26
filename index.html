@@ -7,30 +7,27 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#ffffff">
-  
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone@7/babel.min.js"></script>
-  
+
+  <!-- 固定版本，避免 CDN 套件未來升版造成相容性問題 -->
+  <script crossorigin src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.28.4/babel.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
-  
-  <script src="https://cdn.tailwindcss.com"></script>
-  
-  <script src="https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js"></script>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
 
   <style>
     body {
       margin: 0;
       padding: 0;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-        sans-serif;
+        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
       overflow: hidden;
       background-color: #f9fafb;
     }
-    
+
     #root {
       width: 100vw;
       height: 100vh;
@@ -38,19 +35,10 @@
       overflow: hidden;
     }
 
-    .no-scrollbar::-webkit-scrollbar {
-      display: none;
-    }
-    .no-scrollbar {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    input, textarea, select { font-size: 16px !important; }
 
-    input, textarea, select {
-      font-size: 16px !important; 
-    }
-
-    /* Markdown Styles */
     .markdown-preview {
       color: #374151;
       line-height: 1.7;
@@ -78,17 +66,17 @@
 </head>
 <body>
   <div id="root"></div>
-  
-   <script
-    type="text/babel"
-    data-presets="react">
-    const { useState, useEffect, useRef } = React;
-    
+
+  <script type="text/babel" data-presets="react">
+    if (typeof React === 'undefined' || typeof ReactDOM === 'undefined') {
+      document.getElementById('root').innerHTML = '<div style="padding:24px;font-family:sans-serif;color:#b91c1c">React 載入失敗，請確認網路連線後重新整理。</div>';
+      throw new Error('React/ReactDOM dependency failed to load');
+    }
+
+    const { useState, useEffect, useRef, useMemo, useCallback } = React;
+
     if (typeof marked !== 'undefined') {
-      marked.setOptions({
-        breaks: true,
-        gfm: true
-      });
+      marked.setOptions({ breaks: true, gfm: true });
     }
 
     // --- Icons ---
@@ -105,9 +93,8 @@
     const ArrowLeft = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>;
     const Edit2 = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>;
     const Trash2 = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>;
-    const Save = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>;
+    const SortIcon = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"></path><path d="M6 12h12"></path><path d="M10 18h4"></path></svg>;
 
-    // --- Templates ---
     const TEMPLATES = [
       { id: 'journal', label: '每日日記', icon: '📅', type: 'inspiration', content: `## 🎯 今日目標\n- [ ] \n- [ ] \n\n## 📝 隨手記\n\n\n## 🌙 晚間回顧\n- 今天最棒的事：\n- 需要改進的地方：` },
       { id: 'meeting', label: '會議記錄', icon: '📝', type: 'project', content: `## 📅 會議資訊\n- 日期：${new Date().toLocaleDateString()}\n- 參與者：\n\n## 📝 議程\n1. \n2. \n\n## ✅ 待辦事項\n- [ ] ` },
@@ -115,77 +102,160 @@
       { id: 'project', label: '專案', icon: '🚀', type: 'project', content: `## 🎯 目標\n\n\n## 🗓️ 階段\n- [ ] 階段一：\n- [ ] 階段二：\n\n## 🛠️ 資源\n` }
     ];
 
-    // --- Main App Component ---
+    const TYPE_SORT_ORDER = ['permanent', 'project', 'inspiration', 'literature'];
+
+    const createStrokeCollator = () => {
+      const options = { sensitivity: 'base', numeric: true, ignorePunctuation: true };
+      try {
+        return new Intl.Collator('zh-TW-u-co-stroke', options);
+      } catch (e) {
+        try { return new Intl.Collator('zh-TW', options); }
+        catch (e2) { return { compare: (a, b) => String(a).localeCompare(String(b)) }; }
+      }
+    };
+    const strokeCollator = createStrokeCollator();
+
+    const safeText = (value) => typeof value === 'string' ? value : '';
+    const safeTimestamp = (value) => {
+      const parsed = Date.parse(value || '');
+      return Number.isFinite(parsed) ? parsed : 0;
+    };
+
+    const sortNotes = (notes, sortOption) => {
+      const result = [...notes];
+      const byStroke = (a, b) => strokeCollator.compare(safeText(a.title), safeText(b.title));
+      const stableFallback = (a, b) => safeText(a.id).localeCompare(safeText(b.id));
+
+      result.sort((a, b) => {
+        let compare = 0;
+        switch (sortOption) {
+          case 'updated-asc':
+            compare = safeTimestamp(a.updatedAt) - safeTimestamp(b.updatedAt);
+            break;
+          case 'created-desc':
+            compare = safeTimestamp(b.createdAt) - safeTimestamp(a.createdAt);
+            break;
+          case 'created-asc':
+            compare = safeTimestamp(a.createdAt) - safeTimestamp(b.createdAt);
+            break;
+          case 'type': {
+            const aIndex = TYPE_SORT_ORDER.indexOf(a.type);
+            const bIndex = TYPE_SORT_ORDER.indexOf(b.type);
+            const normalizedA = aIndex === -1 ? TYPE_SORT_ORDER.length : aIndex;
+            const normalizedB = bIndex === -1 ? TYPE_SORT_ORDER.length : bIndex;
+            compare = normalizedA - normalizedB;
+            if (compare === 0) compare = byStroke(a, b);
+            break;
+          }
+          case 'stroke-desc':
+            compare = -byStroke(a, b);
+            break;
+          case 'stroke-asc':
+            compare = byStroke(a, b);
+            break;
+          case 'updated-desc':
+          default:
+            compare = safeTimestamp(b.updatedAt) - safeTimestamp(a.updatedAt);
+            break;
+        }
+        return compare !== 0 ? compare : stableFallback(a, b);
+      });
+      return result;
+    };
+
+    const safeStorageGet = (key) => {
+      try { return localStorage.getItem(key); }
+      catch (e) { console.warn(`LocalStorage read failed: ${key}`, e); return null; }
+    };
+
+    const safeStorageSet = (key, value) => {
+      try { localStorage.setItem(key, value); return true; }
+      catch (e) { console.warn(`LocalStorage write failed: ${key}`, e); return false; }
+    };
+
+    const normalizeDate = (value, fallback) => safeTimestamp(value) > 0 ? value : fallback;
+
+    const normalizeImportedNote = (note) => {
+      if (!note || typeof note !== 'object') return null;
+      const now = new Date().toISOString();
+      return {
+        ...note,
+        id: safeText(note.id) || `${Date.now()}${Math.random().toString(36).slice(2, 8)}`,
+        title: safeText(note.title),
+        content: safeText(note.content),
+        type: TYPE_SORT_ORDER.includes(note.type) ? note.type : 'permanent',
+        tags: Array.isArray(note.tags) ? note.tags.filter(tag => typeof tag === 'string') : [],
+        links: Array.isArray(note.links) ? note.links.filter(link => typeof link === 'string') : [],
+        createdAt: normalizeDate(note.createdAt, normalizeDate(note.updatedAt, now)),
+        updatedAt: normalizeDate(note.updatedAt, normalizeDate(note.createdAt, now))
+      };
+    };
+
     const ZettelkastenApp = () => {
-      const [notes, setNotes] = useState([]);
+      const [notes, setNotes] = useState(() => {
+        const stored = safeStorageGet('zettelkasten_notes');
+        if (!stored) return [];
+        try {
+          const parsed = JSON.parse(stored);
+          if (!Array.isArray(parsed)) throw new Error('Stored notes must be an array');
+          return parsed.map(normalizeImportedNote).filter(Boolean);
+        } catch (e) {
+          console.error('Failed to parse notes', e);
+          return [];
+        }
+      });
       const [currentNote, setCurrentNote] = useState(null);
       const [searchTerm, setSearchTerm] = useState('');
       const [selectedTags, setSelectedTags] = useState([]);
       const [view, setView] = useState('list');
       const [editMode, setEditMode] = useState(false);
+      const [sortOption, setSortOption] = useState(() => safeStorageGet('zettelkasten_sort') || 'updated-desc');
       const fileInputRef = useRef(null);
-      
-      // Link Search State
+
       const [linkSearchTerm, setLinkSearchTerm] = useState('');
       const [isLinkDropdownOpen, setIsLinkDropdownOpen] = useState(false);
-      
+
       const touchStartX = useRef(null);
       const touchStartY = useRef(null);
       const touchStartTime = useRef(null);
-      
-      const [formData, setFormData] = useState({
-        title: '',
-        content: '',
-        type: 'permanent',
-        tags: [],
-        links: []
-      });
+
+      const [formData, setFormData] = useState({ title: '', content: '', type: 'permanent', tags: [], links: [] });
 
       useEffect(() => {
-        const stored = localStorage.getItem('zettelkasten_notes');
-        if (stored) {
-          try {
-            setNotes(JSON.parse(stored));
-          } catch (e) {
-            console.error("Failed to parse notes", e);
-            setNotes([]);
-          }
-        }
-      }, []);
-
-      useEffect(() => {
-        if (notes.length > 0) {
-          localStorage.setItem('zettelkasten_notes', JSON.stringify(notes));
-        }
+        safeStorageSet('zettelkasten_notes', JSON.stringify(notes));
       }, [notes]);
+
+      useEffect(() => {
+        safeStorageSet('zettelkasten_sort', sortOption);
+      }, [sortOption]);
 
       const generateId = () => {
         const now = new Date();
         return now.getFullYear().toString() +
-               (now.getMonth() + 1).toString().padStart(2, '0') +
-               now.getDate().toString().padStart(2, '0') +
-               now.getHours().toString().padStart(2, '0') +
-               now.getMinutes().toString().padStart(2, '0') +
-               now.getSeconds().toString().padStart(2, '0');
+          (now.getMonth() + 1).toString().padStart(2, '0') +
+          now.getDate().toString().padStart(2, '0') +
+          now.getHours().toString().padStart(2, '0') +
+          now.getMinutes().toString().padStart(2, '0') +
+          now.getSeconds().toString().padStart(2, '0') +
+          now.getMilliseconds().toString().padStart(3, '0');
       };
 
       const createNote = () => {
         setFormData({ title: '', content: '', type: 'permanent', tags: [], links: [] });
         setCurrentNote(null);
+        setLinkSearchTerm('');
         setEditMode(true);
         setView('edit');
       };
 
       const applyTemplate = (template) => {
-        if (formData.content.trim().length > 0) {
-          if (!window.confirm('目前已有內容，套用模板將會覆蓋現有內容，確定要繼續嗎？')) return;
-        }
-        setFormData({
-          ...formData,
+        if (formData.content.trim().length > 0 && !window.confirm('目前已有內容，套用模板將會覆蓋現有內容，確定要繼續嗎？')) return;
+        setFormData(prev => ({
+          ...prev,
           content: template.content,
           type: template.type,
-          title: template.id === 'journal' ? new Date().toLocaleDateString() + ' 日記' : formData.title
-        });
+          title: template.id === 'journal' ? new Date().toLocaleDateString() + ' 日記' : prev.title
+        }));
       };
 
       const saveNote = () => {
@@ -195,56 +265,52 @@
         }
         const noteData = {
           ...formData,
+          title: formData.title.trim(),
           id: currentNote?.id || generateId(),
           createdAt: currentNote?.createdAt || new Date().toISOString(),
           updatedAt: new Date().toISOString()
         };
-        let newNotes;
-        if (currentNote) {
-          newNotes = notes.map(n => n.id === currentNote.id ? noteData : n);
-        } else {
-          newNotes = [...notes, noteData];
-        }
-        setNotes(newNotes);
-        localStorage.setItem('zettelkasten_notes', JSON.stringify(newNotes));
+        setNotes(prev => currentNote ? prev.map(n => n.id === currentNote.id ? noteData : n) : [...prev, noteData]);
         setCurrentNote(noteData);
         setEditMode(false);
       };
 
       const deleteNote = (id) => {
+        if (!id) return;
         if (window.confirm('確定要刪除這張卡片嗎？')) {
-          const newNotes = notes.filter(n => n.id !== id);
-          setNotes(newNotes);
-          localStorage.setItem('zettelkasten_notes', JSON.stringify(newNotes));
+          setNotes(prev => prev.filter(n => n.id !== id));
           if (currentNote?.id === id) {
             setCurrentNote(null);
             setView('list');
+            setEditMode(false);
           }
         }
       };
 
       const viewNote = (note) => {
+        if (!note) return;
         setCurrentNote(note);
         setFormData({
-          title: note.title,
-          content: note.content,
-          type: note.type,
-          tags: note.tags || [],
-          links: note.links || []
+          title: safeText(note.title),
+          content: safeText(note.content),
+          type: TYPE_SORT_ORDER.includes(note.type) ? note.type : 'permanent',
+          tags: Array.isArray(note.tags) ? note.tags : [],
+          links: Array.isArray(note.links) ? note.links : []
         });
         setEditMode(false);
         setView('edit');
       };
 
       const addTag = (tag) => {
-        if (tag && !formData.tags.includes(tag)) {
-          setFormData({ ...formData, tags: [...formData.tags, tag] });
+        const normalized = safeText(tag).trim();
+        if (normalized && !formData.tags.includes(normalized)) {
+          setFormData(prev => ({ ...prev, tags: [...prev.tags, normalized] }));
         }
       };
 
       const addLink = (noteId) => {
         if (noteId && !formData.links.includes(noteId)) {
-          setFormData({ ...formData, links: [...formData.links, noteId] });
+          setFormData(prev => ({ ...prev, links: [...prev.links, noteId] }));
           setLinkSearchTerm('');
           setIsLinkDropdownOpen(false);
         }
@@ -255,10 +321,17 @@
           setView('list');
           setEditMode(false);
         } else if (editMode) {
-            setEditMode(false);
+          setEditMode(false);
+          setFormData({
+            title: safeText(currentNote?.title),
+            content: safeText(currentNote?.content),
+            type: currentNote?.type || 'permanent',
+            tags: currentNote?.tags || [],
+            links: currentNote?.links || []
+          });
         } else {
-            setCurrentNote(null);
-            setView('list');
+          setCurrentNote(null);
+          setView('list');
         }
       };
 
@@ -269,51 +342,71 @@
       };
 
       const onTouchEnd = (e) => {
-        if (!touchStartX.current || !touchStartY.current) return;
+        if (touchStartX.current === null || touchStartY.current === null) return;
         const touchEndX = e.changedTouches[0].clientX;
         const touchEndY = e.changedTouches[0].clientY;
         const timeSpent = Date.now() - touchStartTime.current;
         const distX = touchStartX.current - touchEndX;
         const distY = touchStartY.current - touchEndY;
-        if (distX < -50 && Math.abs(distX) > Math.abs(distY) && timeSpent < 300) {
-          handleBack();
-        }
+        if (distX < -50 && Math.abs(distX) > Math.abs(distY) && timeSpent < 300) handleBack();
         touchStartX.current = null;
         touchStartY.current = null;
         touchStartTime.current = null;
       };
 
-      const handleImportClick = () => fileInputRef.current.click();
+      const handleImportClick = () => fileInputRef.current?.click();
 
       const handleFileChange = (event) => {
-        const file = event.target.files[0];
+        const file = event.target.files?.[0];
         if (!file) return;
         const reader = new FileReader();
         reader.onload = (e) => {
           try {
-            const importedNotes = JSON.parse(e.target.result);
-            if (!Array.isArray(importedNotes)) { alert('格式錯誤'); return; }
-            if (window.confirm(`準備匯入 ${importedNotes.length} 張卡片？`)) {
-              const existingMap = new Map(notes.map(n => [n.id, n]));
-              importedNotes.forEach(n => existingMap.set(n.id, n));
-              const newNotes = Array.from(existingMap.values());
-              setNotes(newNotes);
-              localStorage.setItem('zettelkasten_notes', JSON.stringify(newNotes));
+            const imported = JSON.parse(e.target.result);
+            if (!Array.isArray(imported)) {
+              alert('格式錯誤：備份檔最外層必須是陣列');
+              return;
+            }
+            const importedNotes = imported.map(normalizeImportedNote).filter(Boolean);
+            if (window.confirm(`準備匯入 ${importedNotes.length} 張卡片？同 ID 卡片會以匯入檔覆蓋。`)) {
+              setNotes(prev => {
+                const existingMap = new Map(prev.map(n => [n.id, n]));
+                importedNotes.forEach(n => existingMap.set(n.id, n));
+                return Array.from(existingMap.values());
+              });
               alert('匯入成功！');
               setView('list');
             }
-          } catch (err) { alert('匯入失敗'); }
+          } catch (err) {
+            console.error(err);
+            alert('匯入失敗：JSON 格式不正確');
+          }
         };
         reader.readAsText(file);
         event.target.value = '';
       };
 
-      const allTags = [...new Set(notes.flatMap(n => n.tags || []))];
-      const filteredNotes = notes.filter(note => {
-        const matchSearch = searchTerm === '' || note.title.toLowerCase().includes(searchTerm.toLowerCase()) || note.content.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchTags = selectedTags.length === 0 || selectedTags.every(tag => note.tags?.includes(tag));
-        return matchSearch && matchTags;
-      });
+      const noteTypeConfig = {
+        permanent: { icon: FileText, label: '永久筆記', shortLabel: '永久', color: 'bg-green-100 text-green-700' },
+        project: { icon: ListIcon, label: '專案筆記', shortLabel: '專案', color: 'bg-blue-100 text-blue-700' },
+        inspiration: { icon: Plus, label: '靈感筆記', shortLabel: '靈感', color: 'bg-yellow-100 text-yellow-700' },
+        literature: { icon: BookOpen, label: '文獻筆記', shortLabel: '文獻', color: 'bg-purple-100 text-purple-700' }
+      };
+
+      const allTags = useMemo(() => [...new Set(notes.flatMap(n => Array.isArray(n.tags) ? n.tags : []))].sort((a, b) => strokeCollator.compare(a, b)), [notes]);
+
+      const sortedFilteredNotes = useMemo(() => {
+        const lowered = searchTerm.trim().toLocaleLowerCase('zh-TW');
+        const filtered = notes.filter(note => {
+          const title = safeText(note.title).toLocaleLowerCase('zh-TW');
+          const content = safeText(note.content).toLocaleLowerCase('zh-TW');
+          const matchSearch = !lowered || title.includes(lowered) || content.includes(lowered);
+          const tags = Array.isArray(note.tags) ? note.tags : [];
+          const matchTags = selectedTags.length === 0 || selectedTags.every(tag => tags.includes(tag));
+          return matchSearch && matchTags;
+        });
+        return sortNotes(filtered, sortOption);
+      }, [notes, searchTerm, selectedTags, sortOption]);
 
       const exportNotes = () => {
         const dataStr = JSON.stringify(notes, null, 2);
@@ -321,51 +414,52 @@
         const url = URL.createObjectURL(dataBlob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `zettelkasten_backup_${new Date().toISOString().slice(0,10)}.json`;
+        link.download = `zettelkasten_backup_${new Date().toISOString().slice(0, 10)}.json`;
+        document.body.appendChild(link);
         link.click();
-      };
-
-      const noteTypeConfig = {
-        permanent: { icon: FileText, label: '永久筆記', color: 'bg-green-100 text-green-700' },
-        project: { icon: ListIcon, label: '專案筆記', color: 'bg-blue-100 text-blue-700' },
-        inspiration: { icon: Plus, label: '靈感筆記', color: 'bg-yellow-100 text-yellow-700' },
-        literature: { icon: BookOpen, label: '文獻筆記', color: 'bg-purple-100 text-purple-700' }
+        link.remove();
+        URL.revokeObjectURL(url);
       };
 
       const renderMarkdown = (text) => {
         if (!text) return null;
+        if (typeof marked === 'undefined') return <pre className="whitespace-pre-wrap font-sans">{text}</pre>;
         const html = marked.parse(text);
         return <div className="markdown-preview" dangerouslySetInnerHTML={{ __html: html }} />;
       };
 
-      const showList = view === 'list' && (!currentNote || window.innerWidth >= 768);
       const listContainerClass = `bg-white border-r border-gray-200 flex flex-col h-full ${(view === 'list' && !currentNote) ? 'w-full' : 'hidden md:flex md:w-80'}`;
       const mainContainerClass = `flex-1 overflow-hidden h-full flex flex-col bg-white ${(currentNote || view === 'edit' || view === 'graph') ? 'w-full' : 'hidden md:flex'}`;
 
-      // 連結搜尋過濾邏輯
-      const filteredLinkCandidates = notes.filter(n => 
-        n.id !== currentNote?.id && 
-        !formData.links.includes(n.id) && 
-        n.title.toLowerCase().includes(linkSearchTerm.toLowerCase())
-      );
+      const filteredLinkCandidates = useMemo(() => {
+        const term = linkSearchTerm.toLocaleLowerCase('zh-TW');
+        return notes.filter(n =>
+          n.id !== currentNote?.id &&
+          !formData.links.includes(n.id) &&
+          safeText(n.title).toLocaleLowerCase('zh-TW').includes(term)
+        );
+      }, [notes, currentNote, formData.links, linkSearchTerm]);
+
+      const graphNodeClick = useCallback((note) => viewNote(note), []);
 
       return (
         <div className="h-full flex flex-col bg-gray-50">
-          <input type="file" ref={fileInputRef} onChange={handleFileChange} accept=".json" style={{ display: 'none' }} />
+          <input type="file" ref={fileInputRef} onChange={handleFileChange} accept=".json,application/json" style={{ display: 'none' }} />
+
           <header className="bg-white border-b border-gray-200 px-4 py-3 flex-shrink-0 z-20">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-3 min-w-0">
                 {(currentNote || view === 'graph' || view === 'edit') && (
-                    <button onClick={() => { if(view==='graph') setView('list'); else handleBack(); }} className="md:hidden p-2 -ml-2 text-gray-600"><ArrowLeft size={24} /></button>
+                  <button onClick={() => { if (view === 'graph') setView('list'); else handleBack(); }} className="md:hidden p-2 -ml-2 text-gray-600" aria-label="返回"><ArrowLeft size={24} /></button>
                 )}
                 <h1 className="text-xl font-bold text-gray-800 truncate">{view === 'graph' ? '關係圖譜' : 'Zettelkasten'}</h1>
               </div>
               <div className="flex space-x-2">
-                {view !== 'graph' && <button onClick={() => setView('graph')} className="p-2 text-gray-600 hover:bg-gray-100 rounded-full"><Network size={24} /></button>}
-                {view === 'graph' && <button onClick={() => setView('list')} className="p-2 text-gray-600 hover:bg-gray-100 rounded-full"><ListIcon size={24} /></button>}
-                <button onClick={handleImportClick} className="p-2 text-gray-600 hover:bg-gray-100 rounded-full"><Upload size={24} /></button>
-                <button onClick={exportNotes} className="p-2 text-gray-600 hover:bg-gray-100 rounded-full"><Download size={24} /></button>
-                <button onClick={createNote} className="md:hidden p-2 text-blue-600 hover:bg-gray-100 rounded-full"><Plus size={24} /></button>
+                {view !== 'graph' && <button onClick={() => setView('graph')} className="p-2 text-gray-600 hover:bg-gray-100 rounded-full" title="關係圖譜" aria-label="關係圖譜"><Network size={24} /></button>}
+                {view === 'graph' && <button onClick={() => setView('list')} className="p-2 text-gray-600 hover:bg-gray-100 rounded-full" title="筆記列表" aria-label="筆記列表"><ListIcon size={24} /></button>}
+                <button onClick={handleImportClick} className="p-2 text-gray-600 hover:bg-gray-100 rounded-full" title="匯入 JSON" aria-label="匯入 JSON"><Upload size={24} /></button>
+                <button onClick={exportNotes} className="p-2 text-gray-600 hover:bg-gray-100 rounded-full" title="匯出 JSON" aria-label="匯出 JSON"><Download size={24} /></button>
+                <button onClick={createNote} className="md:hidden p-2 text-blue-600 hover:bg-gray-100 rounded-full" aria-label="新增筆記"><Plus size={24} /></button>
                 <button onClick={createNote} className="hidden md:flex px-4 py-2 bg-blue-500 text-white rounded-lg items-center space-x-2 hover:bg-blue-600 transition-colors shadow-sm"><Plus size={18} /><span>新增</span></button>
               </div>
             </div>
@@ -373,122 +467,164 @@
 
           <div className="flex-1 flex overflow-hidden relative">
             <aside className={listContainerClass}>
-                <div className="p-3 border-b border-gray-200 bg-gray-50">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-                    <input type="text" placeholder="搜尋..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm" />
-                  </div>
+              <div className="p-3 border-b border-gray-200 bg-gray-50 space-y-2">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                  <input type="text" placeholder="搜尋..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm" />
                 </div>
+
+                <div className="relative">
+                  <SortIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" size={18} />
+                  <select value={sortOption} onChange={(e) => setSortOption(e.target.value)} className="w-full pl-10 pr-9 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm text-gray-700" aria-label="筆記排序">
+                    <option value="updated-desc">日期：最近更新</option>
+                    <option value="updated-asc">日期：最早更新</option>
+                    <option value="created-desc">建立日期：新 → 舊</option>
+                    <option value="created-asc">建立日期：舊 → 新</option>
+                    <option value="type">類別：永久 → 專案 → 靈感 → 文獻</option>
+                    <option value="stroke-asc">筆畫：標題正序</option>
+                    <option value="stroke-desc">筆畫：標題反序</option>
+                  </select>
+                </div>
+
+                <div className="flex items-center justify-between px-1 text-xs text-gray-400">
+                  <span>{sortedFilteredNotes.length} / {notes.length} 張筆記</span>
+                  {(searchTerm || selectedTags.length > 0) && <button onClick={() => { setSearchTerm(''); setSelectedTags([]); }} className="text-blue-500 hover:text-blue-700">清除篩選</button>}
+                </div>
+              </div>
+
+              {allTags.length > 0 && (
                 <div className="px-3 py-2 border-b border-gray-200 flex-shrink-0">
                   <div className="flex overflow-x-auto no-scrollbar gap-2 pb-1">
                     {allTags.map(tag => (
-                      <button key={tag} onClick={() => setSelectedTags(selectedTags.includes(tag) ? selectedTags.filter(t=>t!==tag) : [...selectedTags, tag])} className={'flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ' + (selectedTags.includes(tag) ? 'bg-blue-500 text-white shadow-sm' : 'bg-gray-100 text-gray-600 border border-gray-200')}>#{tag}</button>
+                      <button key={tag} onClick={() => setSelectedTags(selectedTags.includes(tag) ? selectedTags.filter(t => t !== tag) : [...selectedTags, tag])} className={'flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ' + (selectedTags.includes(tag) ? 'bg-blue-500 text-white shadow-sm' : 'bg-gray-100 text-gray-600 border border-gray-200')}>#{tag}</button>
                     ))}
                   </div>
                 </div>
-                <div className="flex-1 overflow-y-auto p-2 space-y-2 bg-gray-50">
-                  {filteredNotes.map(note => {
-                      const TypeIcon = noteTypeConfig[note.type] ? noteTypeConfig[note.type].icon : FileText;
-                      return (
-                        <div key={note.id} onClick={() => viewNote(note)} className={'p-4 bg-white border border-gray-100 rounded-xl shadow-sm active:scale-[0.98] transition-transform cursor-pointer ' + (currentNote?.id === note.id ? 'ring-2 ring-blue-500 border-transparent' : '')}>
-                          <div className="flex items-start justify-between mb-2">
-                            <div className="flex items-center space-x-2"><span className={'p-1.5 rounded-md ' + (noteTypeConfig[note.type]?.color.split(' ')[0] || 'bg-gray-100')}><TypeIcon size={14} className={noteTypeConfig[note.type]?.color.split(' ')[1] || 'text-gray-500'} /></span></div>
-                            <span className="text-xs text-gray-400">{new Date(note.updatedAt).toLocaleDateString()}</span>
-                          </div>
-                          <h3 className="font-bold text-gray-800 mb-1 text-base leading-tight">{note.title || '無標題'}</h3>
-                          <p className="text-sm text-gray-500 line-clamp-2 leading-relaxed">{note.content}</p>
-                          {note.tags && note.tags.length > 0 && <div className="flex flex-wrap gap-1 mt-3">{note.tags.slice(0, 3).map(tag => <span key={tag} className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded text-xs">#{tag}</span>)}</div>}
+              )}
+
+              <div className="flex-1 overflow-y-auto p-2 space-y-2 bg-gray-50">
+                {sortedFilteredNotes.length === 0 && (
+                  <div className="p-8 text-center text-sm text-gray-400">{notes.length === 0 ? '目前沒有筆記' : '找不到符合條件的筆記'}</div>
+                )}
+                {sortedFilteredNotes.map(note => {
+                  const config = noteTypeConfig[note.type] || { icon: FileText, label: '未分類', shortLabel: '其他', color: 'bg-gray-100 text-gray-500' };
+                  const TypeIcon = config.icon;
+                  const colorParts = config.color.split(' ');
+                  return (
+                    <div key={note.id} onClick={() => viewNote(note)} className={'p-4 bg-white border border-gray-100 rounded-xl shadow-sm active:scale-[0.98] transition-transform cursor-pointer ' + (currentNote?.id === note.id ? 'ring-2 ring-blue-500 border-transparent' : '')}>
+                      <div className="flex items-start justify-between mb-2 gap-2">
+                        <div className="flex items-center space-x-2 min-w-0">
+                          <span className={'p-1.5 rounded-md ' + (colorParts[0] || 'bg-gray-100')}><TypeIcon size={14} className={colorParts[1] || 'text-gray-500'} /></span>
+                          <span className="text-xs text-gray-400 truncate">{config.shortLabel}</span>
                         </div>
-                      );
-                  })}
-                  <div className="h-20 md:hidden"></div>
-                </div>
+                        <span className="text-xs text-gray-400 flex-shrink-0">{new Date(note.updatedAt).toLocaleDateString('zh-TW')}</span>
+                      </div>
+                      <h3 className="font-bold text-gray-800 mb-1 text-base leading-tight">{note.title || '無標題'}</h3>
+                      <p className="text-sm text-gray-500 line-clamp-2 leading-relaxed whitespace-pre-line">{note.content}</p>
+                      {note.tags?.length > 0 && <div className="flex flex-wrap gap-1 mt-3">{note.tags.slice(0, 3).map(tag => <span key={tag} className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded text-xs">#{tag}</span>)}</div>}
+                    </div>
+                  );
+                })}
+                <div className="h-20 md:hidden"></div>
+              </div>
             </aside>
 
-            {!currentNote && view !== 'graph' && <button onClick={createNote} className="md:hidden absolute right-6 bottom-8 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-700 active:scale-90 transition-transform z-30"><Plus size={28} /></button>}
+            {!currentNote && view !== 'graph' && <button onClick={createNote} className="md:hidden absolute right-6 bottom-8 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-700 active:scale-90 transition-transform z-30" aria-label="新增筆記"><Plus size={28} /></button>}
 
             <main className={mainContainerClass}>
-              {view === 'graph' ? <GraphView notes={notes} onNodeClick={(note) => { viewNote(note); }} /> : (
+              {view === 'graph' ? <GraphView notes={notes} onNodeClick={graphNodeClick} /> : (
                 <>
                   {!currentNote && !editMode && <div className="hidden md:flex flex-col items-center justify-center h-full text-gray-400 bg-gray-50"><div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4"><FileText size={48} className="opacity-30" /></div><p className="text-lg font-medium">選擇或建立一張卡片</p></div>}
+
                   {(currentNote || editMode) && (
                     <div className="h-full flex flex-col bg-white" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
-                        <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between flex-shrink-0 bg-white sticky top-0 z-10">
-                            <div className="flex items-center space-x-2">
-                                <button onClick={handleBack} className="md:hidden p-2 -ml-2 text-gray-500"><ArrowLeft size={20} /></button>
-                                {editMode ? <span className="text-lg font-bold">{currentNote ? '編輯' : '新增'}</span> : <span className={'px-3 py-1 rounded-full text-xs font-medium ' + (noteTypeConfig[formData.type]?.color || 'bg-gray-100')}>{noteTypeConfig[formData.type]?.label || '未分類'}</span>}
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                {editMode ? <><button onClick={() => deleteNote(currentNote.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-full"><Trash2 size={20} /></button><button onClick={saveNote} className="px-4 py-2 bg-blue-600 text-white text-sm font-bold rounded-full shadow-sm active:scale-95 transition-transform">儲存</button></> : <button onClick={() => setEditMode(true)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-full"><Edit2 size={20} /></button>}
-                            </div>
+                      <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between flex-shrink-0 bg-white sticky top-0 z-10">
+                        <div className="flex items-center space-x-2">
+                          <button onClick={handleBack} className="md:hidden p-2 -ml-2 text-gray-500" aria-label="返回"><ArrowLeft size={20} /></button>
+                          {editMode ? <span className="text-lg font-bold">{currentNote ? '編輯' : '新增'}</span> : <span className={'px-3 py-1 rounded-full text-xs font-medium ' + (noteTypeConfig[formData.type]?.color || 'bg-gray-100')}>{noteTypeConfig[formData.type]?.label || '未分類'}</span>}
                         </div>
+                        <div className="flex items-center space-x-2">
+                          {editMode ? <>
+                            {currentNote && <button onClick={() => deleteNote(currentNote.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-full" aria-label="刪除"><Trash2 size={20} /></button>}
+                            <button onClick={saveNote} className="px-4 py-2 bg-blue-600 text-white text-sm font-bold rounded-full shadow-sm active:scale-95 transition-transform">儲存</button>
+                          </> : <button onClick={() => setEditMode(true)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-full" aria-label="編輯"><Edit2 size={20} /></button>}
+                        </div>
+                      </div>
 
-                        <div className="flex-1 overflow-y-auto p-5 md:p-8">
-                            <div className="max-w-3xl mx-auto space-y-6 pb-20">
-                                {editMode ? (
-                                    <>
-                                        <div className="mb-4">
-                                            <div className="text-xs font-bold text-gray-400 uppercase mb-2">快速模板</div>
-                                            <div className="flex overflow-x-auto no-scrollbar gap-2 pb-2">
-                                              {TEMPLATES.map(template => (
-                                                <button key={template.id} onClick={() => applyTemplate(template)} className="flex-shrink-0 flex items-center space-x-2 px-3 py-2 bg-gray-50 hover:bg-blue-50 border border-gray-200 hover:border-blue-200 rounded-lg transition-colors group"><span className="text-lg">{template.icon}</span><span className="text-sm text-gray-700 group-hover:text-blue-700">{template.label}</span></button>
-                                              ))}
-                                            </div>
-                                        </div>
-                                        <div><input type="text" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className="w-full text-2xl font-bold placeholder-gray-300 border-none focus:ring-0 p-0" placeholder="輸入標題..." /></div>
-                                        <div className="flex overflow-x-auto no-scrollbar gap-2 py-1">
-                                            {Object.entries(noteTypeConfig).map(([type, config]) => {
-                                                const isActive = formData.type === type;
-                                                return <button key={type} onClick={() => setFormData({ ...formData, type })} className={`flex-shrink-0 flex items-center space-x-1.5 px-3 py-2 rounded-lg text-sm transition-all border ${isActive ? 'bg-blue-50 border-blue-200 text-blue-700 ring-1 ring-blue-500' : 'bg-white border-gray-200 text-gray-600'}`}><config.icon size={16} /><span>{config.label}</span></button>
-                                            })}
-                                        </div>
-                                        <textarea value={formData.content} onChange={(e) => setFormData({ ...formData, content: e.target.value })} className="w-full h-[50vh] resize-none border-none focus:ring-0 p-0 text-gray-700 leading-relaxed font-mono text-base" placeholder="開始輸入內容 (支援 Markdown)..." />
-                                        <div className="space-y-2 pt-4 border-t border-gray-100">
-                                            <label className="text-xs font-bold text-gray-500 uppercase">Tags</label>
-                                            <div className="flex flex-wrap gap-2 mb-2">{formData.tags.map(tag => <span key={tag} className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm flex items-center">#{tag}<button onClick={() => setFormData({ ...formData, tags: formData.tags.filter(t => t !== tag) })} className="ml-1 p-0.5 rounded-full hover:bg-blue-100"><X size={12} /></button></span>)}</div>
-                                            <div className="flex gap-2"><input type="text" id="tagInput" className="flex-1 px-4 py-2 bg-gray-50 border-transparent rounded-lg focus:bg-white focus:ring-2 focus:ring-blue-500 transition-colors" placeholder="新增標籤..." onKeyPress={(e) => { if (e.key === 'Enter') { addTag(e.target.value.trim()); e.target.value = ''; } }} /><button onClick={() => { const input = document.getElementById('tagInput'); addTag(input.value.trim()); input.value = ''; }} className="px-4 py-2 bg-gray-100 rounded-lg font-medium text-gray-600">加入</button></div>
-                                        </div>
-                                        
-                                        <div className="space-y-2 pt-4 relative">
-                                            <label className="text-xs font-bold text-gray-500 uppercase">Links (搜尋筆記加入連結)</label>
-                                            <div className="space-y-2 mb-2">
-                                                {formData.links.map(linkId => {
-                                                     const linked = notes.find(n => n.id === linkId);
-                                                     if(!linked) return null;
-                                                     return (
-                                                        <div key={linkId} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                                            <div className="flex items-center space-x-2 overflow-hidden"><Link2 size={16} className="text-gray-400 flex-shrink-0"/><span className="truncate text-sm font-medium">{linked.title}</span></div>
-                                                            <button onClick={() => setFormData({ ...formData, links: formData.links.filter(l => l !== linkId) })} className="text-gray-400 hover:text-red-500 p-1"><X size={16} /></button>
-                                                        </div>
-                                                     )
-                                                })}
-                                            </div>
-                                            <div className="relative">
-                                              <input type="text" placeholder="輸入標題搜尋筆記..." value={linkSearchTerm} onChange={(e) => { setLinkSearchTerm(e.target.value); setIsLinkDropdownOpen(true); }} onFocus={() => setIsLinkDropdownOpen(true)} onBlur={() => setTimeout(() => setIsLinkDropdownOpen(false), 200)} className="w-full px-4 py-2 bg-gray-50 border-transparent rounded-lg focus:bg-white focus:ring-2 focus:ring-blue-500 transition-colors" />
-                                              {isLinkDropdownOpen && linkSearchTerm && (
-                                                <div className="absolute top-full left-0 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-20 max-h-48 overflow-y-auto">
-                                                  {filteredLinkCandidates.length === 0 ? <div className="p-3 text-sm text-gray-400 text-center">找不到相關筆記</div> : filteredLinkCandidates.map(note => (
-                                                      <div key={note.id} onClick={() => addLink(note.id)} className="px-4 py-2 hover:bg-blue-50 cursor-pointer text-sm text-gray-700 flex items-center"><span className="truncate">{note.title}</span></div>
-                                                  ))}
-                                                </div>
-                                              )}
-                                            </div>
-                                        </div>
-                                    </>
-                                ) : (
-                                    <>
-                                        <h1 className="text-3xl font-bold text-gray-900 leading-tight">{formData.title}</h1>
-                                        <div className="flex items-center space-x-4 text-sm text-gray-500 font-mono border-b border-gray-100 pb-4"><span>{new Date(currentNote.updatedAt).toLocaleDateString()}</span></div>
-                                        <div className="text-gray-800">{renderMarkdown(formData.content)}</div>
-                                        {formData.tags.length > 0 && <div className="flex flex-wrap gap-2 pt-6">{formData.tags.map(tag => <span key={tag} className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm">#{tag}</span>)}</div>}
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-8 mt-8 border-t border-gray-100">
-                                            {formData.links.length > 0 && <div><h3 className="text-sm font-bold text-gray-500 uppercase mb-3 flex items-center"><Link2 size={14} className="mr-1"/> 連結至</h3><div className="space-y-2">{formData.links.map(linkId => { const n = notes.find(x => x.id === linkId); return n ? <div key={linkId} onClick={() => viewNote(n)} className="p-3 bg-gray-50 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 cursor-pointer transition-colors">{n.title}</div> : null; })}</div></div>}
-                                            {(() => { const backlinks = notes.filter(n => n.links?.includes(currentNote.id)); return backlinks.length > 0 ? <div><h3 className="text-sm font-bold text-gray-500 uppercase mb-3 flex items-center"><Network size={14} className="mr-1"/> 被引用於</h3><div className="space-y-2">{backlinks.map(n => <div key={n.id} onClick={() => viewNote(n)} className="p-3 bg-blue-50 text-blue-800 rounded-lg text-sm font-medium hover:bg-blue-100 cursor-pointer transition-colors">{n.title}</div>)}</div></div> : null; })()}
-                                        </div>
-                                    </>
-                                )}
-                            </div>
+                      <div className="flex-1 overflow-y-auto p-5 md:p-8">
+                        <div className="max-w-3xl mx-auto space-y-6 pb-20">
+                          {editMode ? (
+                            <>
+                              <div className="mb-4">
+                                <div className="text-xs font-bold text-gray-400 uppercase mb-2">快速模板</div>
+                                <div className="flex overflow-x-auto no-scrollbar gap-2 pb-2">
+                                  {TEMPLATES.map(template => (
+                                    <button key={template.id} onClick={() => applyTemplate(template)} className="flex-shrink-0 flex items-center space-x-2 px-3 py-2 bg-gray-50 hover:bg-blue-50 border border-gray-200 hover:border-blue-200 rounded-lg transition-colors group"><span className="text-lg">{template.icon}</span><span className="text-sm text-gray-700 group-hover:text-blue-700">{template.label}</span></button>
+                                  ))}
+                                </div>
+                              </div>
+
+                              <div><input type="text" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className="w-full text-2xl font-bold placeholder-gray-300 border-none focus:ring-0 p-0" placeholder="輸入標題..." /></div>
+
+                              <div className="flex overflow-x-auto no-scrollbar gap-2 py-1">
+                                {Object.entries(noteTypeConfig).map(([type, config]) => {
+                                  const isActive = formData.type === type;
+                                  const Icon = config.icon;
+                                  return <button key={type} onClick={() => setFormData({ ...formData, type })} className={`flex-shrink-0 flex items-center space-x-1.5 px-3 py-2 rounded-lg text-sm transition-all border ${isActive ? 'bg-blue-50 border-blue-200 text-blue-700 ring-1 ring-blue-500' : 'bg-white border-gray-200 text-gray-600'}`}><Icon size={16} /><span>{config.label}</span></button>;
+                                })}
+                              </div>
+
+                              <textarea value={formData.content} onChange={(e) => setFormData({ ...formData, content: e.target.value })} className="w-full h-[50vh] resize-none border-none focus:ring-0 p-0 text-gray-700 leading-relaxed font-mono text-base" placeholder="開始輸入內容 (支援 Markdown)..." />
+
+                              <div className="space-y-2 pt-4 border-t border-gray-100">
+                                <label className="text-xs font-bold text-gray-500 uppercase">Tags</label>
+                                <div className="flex flex-wrap gap-2 mb-2">{formData.tags.map(tag => <span key={tag} className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm flex items-center">#{tag}<button onClick={() => setFormData({ ...formData, tags: formData.tags.filter(t => t !== tag) })} className="ml-1 p-0.5 rounded-full hover:bg-blue-100" aria-label={`移除 ${tag}`}><X size={12} /></button></span>)}</div>
+                                <div className="flex gap-2">
+                                  <input type="text" id="tagInput" className="flex-1 px-4 py-2 bg-gray-50 border-transparent rounded-lg focus:bg-white focus:ring-2 focus:ring-blue-500 transition-colors" placeholder="新增標籤..." onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addTag(e.currentTarget.value); e.currentTarget.value = ''; } }} />
+                                  <button onClick={() => { const input = document.getElementById('tagInput'); if (input) { addTag(input.value); input.value = ''; } }} className="px-4 py-2 bg-gray-100 rounded-lg font-medium text-gray-600">加入</button>
+                                </div>
+                              </div>
+
+                              <div className="space-y-2 pt-4 relative">
+                                <label className="text-xs font-bold text-gray-500 uppercase">Links (搜尋筆記加入連結)</label>
+                                <div className="space-y-2 mb-2">
+                                  {formData.links.map(linkId => {
+                                    const linked = notes.find(n => n.id === linkId);
+                                    if (!linked) return null;
+                                    return (
+                                      <div key={linkId} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                        <div className="flex items-center space-x-2 overflow-hidden"><Link2 size={16} className="text-gray-400 flex-shrink-0"/><span className="truncate text-sm font-medium">{linked.title}</span></div>
+                                        <button onClick={() => setFormData({ ...formData, links: formData.links.filter(l => l !== linkId) })} className="text-gray-400 hover:text-red-500 p-1" aria-label="移除連結"><X size={16} /></button>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                                <div className="relative">
+                                  <input type="text" placeholder="輸入標題搜尋筆記..." value={linkSearchTerm} onChange={(e) => { setLinkSearchTerm(e.target.value); setIsLinkDropdownOpen(true); }} onFocus={() => setIsLinkDropdownOpen(true)} onBlur={() => setTimeout(() => setIsLinkDropdownOpen(false), 200)} className="w-full px-4 py-2 bg-gray-50 border-transparent rounded-lg focus:bg-white focus:ring-2 focus:ring-blue-500 transition-colors" />
+                                  {isLinkDropdownOpen && linkSearchTerm && (
+                                    <div className="absolute top-full left-0 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-20 max-h-48 overflow-y-auto">
+                                      {filteredLinkCandidates.length === 0 ? <div className="p-3 text-sm text-gray-400 text-center">找不到相關筆記</div> : filteredLinkCandidates.map(note => (
+                                        <div key={note.id} onMouseDown={(e) => e.preventDefault()} onClick={() => addLink(note.id)} className="px-4 py-2 hover:bg-blue-50 cursor-pointer text-sm text-gray-700 flex items-center"><span className="truncate">{note.title}</span></div>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              <h1 className="text-3xl font-bold text-gray-900 leading-tight">{formData.title}</h1>
+                              <div className="flex items-center space-x-4 text-sm text-gray-500 font-mono border-b border-gray-100 pb-4"><span>更新：{new Date(currentNote.updatedAt).toLocaleDateString('zh-TW')}</span><span>建立：{new Date(currentNote.createdAt).toLocaleDateString('zh-TW')}</span></div>
+                              <div className="text-gray-800">{renderMarkdown(formData.content)}</div>
+                              {formData.tags.length > 0 && <div className="flex flex-wrap gap-2 pt-6">{formData.tags.map(tag => <span key={tag} className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm">#{tag}</span>)}</div>}
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-8 mt-8 border-t border-gray-100">
+                                {formData.links.length > 0 && <div><h3 className="text-sm font-bold text-gray-500 uppercase mb-3 flex items-center"><Link2 size={14} className="mr-1"/> 連結至</h3><div className="space-y-2">{formData.links.map(linkId => { const n = notes.find(x => x.id === linkId); return n ? <div key={linkId} onClick={() => viewNote(n)} className="p-3 bg-gray-50 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 cursor-pointer transition-colors">{n.title}</div> : null; })}</div></div>}
+                                {(() => { const backlinks = notes.filter(n => n.links?.includes(currentNote.id)); return backlinks.length > 0 ? <div><h3 className="text-sm font-bold text-gray-500 uppercase mb-3 flex items-center"><Network size={14} className="mr-1"/> 被引用於</h3><div className="space-y-2">{backlinks.map(n => <div key={n.id} onClick={() => viewNote(n)} className="p-3 bg-blue-50 text-blue-800 rounded-lg text-sm font-medium hover:bg-blue-100 cursor-pointer transition-colors">{n.title}</div>)}</div></div> : null; })()}
+                              </div>
+                            </>
+                          )}
                         </div>
+                      </div>
                     </div>
                   )}
                 </>
@@ -499,76 +635,53 @@
       );
     };
 
-    // --- Graph View Component (SVG) ---
     const GraphView = ({ notes, onNodeClick }) => {
       const svgRef = useRef(null);
       const containerRef = useRef(null);
       const [selectedType, setSelectedType] = useState('all');
 
       useEffect(() => {
-        if (!notes.length || !svgRef.current || !containerRef.current) return;
+        if (!notes.length || !svgRef.current || !containerRef.current || typeof d3 === 'undefined') return;
 
-        const width = containerRef.current.clientWidth;
-        const height = containerRef.current.clientHeight;
-
-        const filteredNotes = selectedType === 'all' 
-          ? notes 
-          : notes.filter(n => n.type === selectedType);
-
+        const width = Math.max(containerRef.current.clientWidth, 320);
+        const height = Math.max(containerRef.current.clientHeight, 320);
+        const filteredNotes = selectedType === 'all' ? notes : notes.filter(n => n.type === selectedType);
         const nodesData = filteredNotes.map(n => ({ ...n }));
+        const noteIds = new Set(filteredNotes.map(n => n.id));
         const linksData = [];
-        
+
         filteredNotes.forEach(sourceNote => {
           sourceNote.links?.forEach(targetId => {
-            if (filteredNotes.find(n => n.id === targetId)) {
-              linksData.push({ source: sourceNote.id, target: targetId });
-            }
+            if (noteIds.has(targetId)) linksData.push({ source: sourceNote.id, target: targetId });
           });
         });
 
-        const svg = d3.select(svgRef.current)
-          .attr('viewBox', [0, 0, width, height]);
-
+        const svg = d3.select(svgRef.current).attr('viewBox', [0, 0, width, height]);
         svg.selectAll('*').remove();
-
         const g = svg.append('g');
 
         const getTextWidth = (text, fontSize = 10) => {
-           let width = 0;
-           for (let i = 0; i < text.length; i++) {
-             width += text.charCodeAt(i) > 255 ? fontSize : fontSize * 0.65;
-           }
-           return width + 12;
+          let widthEstimate = 0;
+          for (let i = 0; i < text.length; i++) widthEstimate += text.charCodeAt(i) > 255 ? fontSize : fontSize * 0.65;
+          return widthEstimate + 12;
         };
 
-        const zoom = d3.zoom()
-          .scaleExtent([0.1, 4])
-          .on('zoom', (event) => {
-            const k = event.transform.k;
-            g.attr('transform', event.transform);
-
-            if (k > 1.2) {
-              d3.selectAll('.node-label-group').each(function(d) {
-                const group = d3.select(this);
-                const fullText = d.title.length > 20 ? d.title.substring(0, 20) + '...' : d.title;
-                const w = getTextWidth(fullText);
-                group.select('text').text(fullText);
-                group.select('rect').attr('width', w).attr('x', -w / 2).style('opacity', 0.95).style('stroke', '#cbd5e1');
-                group.raise();
-              });
-            } else {
-              d3.selectAll('.node-label-group').each(function(d) {
-                const group = d3.select(this);
-                const shortText = d.title.length > 6 ? d.title.substring(0, 6) + '..' : d.title;
-                const w = getTextWidth(shortText);
-                group.select('text').text(shortText);
-                group.select('rect').attr('width', w).attr('x', -w / 2).style('opacity', 0.7).style('stroke', 'none');
-              });
-            }
+        const zoom = d3.zoom().scaleExtent([0.1, 4]).on('zoom', (event) => {
+          const k = event.transform.k;
+          g.attr('transform', event.transform);
+          g.selectAll('.node-label-group').each(function(d) {
+            const group = d3.select(this);
+            const maxLength = k > 1.2 ? 20 : 6;
+            const displayText = safeText(d.title).length > maxLength ? safeText(d.title).substring(0, maxLength) + (k > 1.2 ? '...' : '..') : safeText(d.title);
+            const w = getTextWidth(displayText);
+            group.select('text').text(displayText);
+            group.select('rect').attr('width', w).attr('x', -w / 2).style('opacity', k > 1.2 ? 0.95 : 0.7).style('stroke', k > 1.2 ? '#cbd5e1' : 'none');
+            if (k > 1.2) group.raise();
           });
+        });
 
         svg.call(zoom);
-        svg.call(zoom.transform, d3.zoomIdentity.translate(width/2, height/2).scale(0.8).translate(-width/2, -height/2));
+        svg.call(zoom.transform, d3.zoomIdentity.translate(width / 2, height / 2).scale(0.8).translate(-width / 2, -height / 2));
 
         const simulation = d3.forceSimulation(nodesData)
           .force('link', d3.forceLink(linksData).id(d => d.id).distance(100))
@@ -577,91 +690,29 @@
           .force('collide', d3.forceCollide().radius(40));
 
         svg.append('defs').append('marker')
-          .attr('id', 'arrowhead')
-          .attr('viewBox', '0 -5 10 10')
-          .attr('refX', 22)
-          .attr('refY', 0)
-          .attr('markerWidth', 6)
-          .attr('markerHeight', 6)
-          .attr('orient', 'auto')
+          .attr('id', 'arrowhead').attr('viewBox', '0 -5 10 10').attr('refX', 22).attr('refY', 0)
+          .attr('markerWidth', 6).attr('markerHeight', 6).attr('orient', 'auto')
           .append('path').attr('d', 'M0,-5L10,0L0,5').attr('fill', '#cbd5e1');
 
-        const link = g.append('g')
-          .attr('stroke', '#cbd5e1')
-          .attr('stroke-opacity', 0.6)
-          .selectAll('line')
-          .data(linksData)
-          .join('line')
-          .attr('stroke-width', 1.5)
-          .attr('marker-end', 'url(#arrowhead)');
+        const link = g.append('g').attr('stroke', '#cbd5e1').attr('stroke-opacity', 0.6)
+          .selectAll('line').data(linksData).join('line').attr('stroke-width', 1.5).attr('marker-end', 'url(#arrowhead)');
 
-        const colors = {
-          permanent: '#10b981',
-          project: '#3b82f6',
-          inspiration: '#f59e0b',
-          literature: '#8b5cf6'
-        };
+        const colors = { permanent: '#10b981', project: '#3b82f6', inspiration: '#f59e0b', literature: '#8b5cf6' };
 
-        const node = g.append('g')
-          .selectAll('g')
-          .data(nodesData)
-          .join('g')
+        const node = g.append('g').selectAll('g').data(nodesData).join('g')
           .call(d3.drag()
-            .on('start', (event) => {
-              if (!event.active) simulation.alphaTarget(0.3).restart();
-              event.subject.fx = event.subject.x;
-              event.subject.fy = event.subject.y;
-            })
-            .on('drag', (event) => {
-              event.subject.fx = event.x;
-              event.subject.fy = event.y;
-            })
-            .on('end', (event) => {
-              if (!event.active) simulation.alphaTarget(0);
-              event.subject.fx = null;
-              event.subject.fy = null;
-            })
+            .on('start', (event) => { if (!event.active) simulation.alphaTarget(0.3).restart(); event.subject.fx = event.subject.x; event.subject.fy = event.subject.y; })
+            .on('drag', (event) => { event.subject.fx = event.x; event.subject.fy = event.y; })
+            .on('end', (event) => { if (!event.active) simulation.alphaTarget(0); event.subject.fx = null; event.subject.fy = null; })
           )
           .on('click', (event, d) => onNodeClick(d));
 
-        node.append('circle')
-          .attr('r', 18)
-          .attr('fill', d => colors[d.type] || '#94a3b8')
-          .attr('stroke', '#fff')
-          .attr('stroke-width', 2)
-          .style('cursor', 'pointer');
+        node.append('circle').attr('r', 18).attr('fill', d => colors[d.type] || '#94a3b8').attr('stroke', '#fff').attr('stroke-width', 2).style('cursor', 'pointer');
 
-        const labelGroup = node.append('g')
-          .attr('class', 'node-label-group')
-          .attr('transform', 'translate(0, 32)')
-          .style('pointer-events', 'none');
-
-        labelGroup.append('rect')
-          .attr('rx', 6)
-          .attr('ry', 6)
-          .attr('height', 16)
-          .attr('fill', 'white')
-          .style('opacity', 0.7)
-          .style('transition', 'opacity 0.2s');
-
-        labelGroup.append('text')
-          .attr('text-anchor', 'middle')
-          .attr('dominant-baseline', 'middle')
-          .attr('y', 8)
-          .attr('fill', '#334155')
-          .style('font-size', '10px')
-          .style('font-weight', '500')
-          .text(d => d.title.length > 6 ? d.title.substring(0, 6) + '..' : d.title);
-
-        labelGroup.select('rect')
-          .attr('width', d => {
-             const t = d.title.length > 6 ? d.title.substring(0, 6) + '..' : d.title;
-             return getTextWidth(t);
-          })
-          .attr('x', d => {
-             const t = d.title.length > 6 ? d.title.substring(0, 6) + '..' : d.title;
-             return -getTextWidth(t) / 2;
-          });
+        const labelGroup = node.append('g').attr('class', 'node-label-group').attr('transform', 'translate(0, 32)').style('pointer-events', 'none');
+        labelGroup.append('rect').attr('rx', 6).attr('ry', 6).attr('height', 16).attr('fill', 'white').style('opacity', 0.7).style('transition', 'opacity 0.2s');
+        labelGroup.append('text').attr('text-anchor', 'middle').attr('dominant-baseline', 'middle').attr('y', 8).attr('fill', '#334155').style('font-size', '10px').style('font-weight', '500').text(d => safeText(d.title).length > 6 ? safeText(d.title).substring(0, 6) + '..' : safeText(d.title));
+        labelGroup.select('rect').attr('width', d => getTextWidth(safeText(d.title).length > 6 ? safeText(d.title).substring(0, 6) + '..' : safeText(d.title))).attr('x', d => -getTextWidth(safeText(d.title).length > 6 ? safeText(d.title).substring(0, 6) + '..' : safeText(d.title)) / 2);
 
         simulation.on('tick', () => {
           link.attr('x1', d => d.source.x).attr('y1', d => d.source.y).attr('x2', d => d.target.x).attr('y2', d => d.target.y);
@@ -671,19 +722,23 @@
         return () => simulation.stop();
       }, [notes, onNodeClick, selectedType]);
 
-      const noteTypeConfig = {
+      const graphTypes = {
         permanent: { label: '永久', color: 'bg-green-500' },
         project: { label: '專案', color: 'bg-blue-500' },
         inspiration: { label: '靈感', color: 'bg-yellow-500' },
         literature: { label: '文獻', color: 'bg-purple-500' }
       };
 
+      if (typeof d3 === 'undefined') {
+        return <div className="w-full h-full flex items-center justify-center p-6 text-center text-red-600">D3.js 載入失敗，關係圖譜暫時無法使用；筆記本身仍可正常讀寫。</div>;
+      }
+
       return (
         <div className="w-full h-full relative bg-slate-50 overflow-hidden">
           <div className="absolute top-4 left-0 right-0 z-10 px-4 overflow-x-auto no-scrollbar flex space-x-2">
-             <button onClick={() => setSelectedType('all')} className={'flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-bold shadow-sm transition-colors border ' + (selectedType === 'all' ? 'bg-gray-800 text-white border-transparent' : 'bg-white text-gray-700 border-gray-200')}>全部</button>
-            {Object.entries(noteTypeConfig).map(([type, config]) => (
-                <button key={type} onClick={() => setSelectedType(type)} className={'flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-bold shadow-sm transition-colors border ' + (selectedType === type ? config.color + ' text-white border-transparent' : 'bg-white text-gray-700 border-gray-200')}>{config.label}</button>
+            <button onClick={() => setSelectedType('all')} className={'flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-bold shadow-sm transition-colors border ' + (selectedType === 'all' ? 'bg-gray-800 text-white border-transparent' : 'bg-white text-gray-700 border-gray-200')}>全部</button>
+            {Object.entries(graphTypes).map(([type, config]) => (
+              <button key={type} onClick={() => setSelectedType(type)} className={'flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-bold shadow-sm transition-colors border ' + (selectedType === type ? config.color + ' text-white border-transparent' : 'bg-white text-gray-700 border-gray-200')}>{config.label}</button>
             ))}
           </div>
           <div ref={containerRef} className="w-full h-full touch-none"><svg ref={svgRef} className="w-full h-full" /></div>
@@ -693,13 +748,11 @@
     };
 
     try {
-      const root = ReactDOM.createRoot(
-        document.getElementById('root')
-      );
-    
+      const root = ReactDOM.createRoot(document.getElementById('root'));
       root.render(<ZettelkastenApp />);
     } catch (e) {
       console.error(e);
+      document.getElementById('root').innerHTML = `<div style="padding:24px;font-family:sans-serif;color:#b91c1c"><strong>程式啟動失敗</strong><br>${String(e.message || e)}</div>`;
     }
   </script>
 </body>
